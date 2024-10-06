@@ -1,0 +1,70 @@
+
+
+
+import 'package:chat/components/bubbles/callBubble.dart';
+import 'package:chat/services/call/call_details.dart';
+import 'package:chat/services/messages/message.dart';
+import 'package:chat/users/person.dart';
+import 'package:chat/widget_main.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+class ChatScreen extends MainWrapperStateful {
+
+
+  late Person person;
+
+  final TextEditingController messageController = TextEditingController();
+
+  final List<Message> messages = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(person.displayName!),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.phone),
+            onPressed: startCall,
+          )
+        ]
+      ),
+      body: Column(
+        children: List.generate(
+          messages.length, (index) {
+            return CallBubble(callState: CallState.ongoing, callTime: "12:02 AM");
+          }),
+      ),
+      bottomNavigationBar: Row(
+        children: [
+          Expanded(child: TextField(controller: messageController, decoration: InputDecoration(hintText: " Type your message..."),)),
+          const ElevatedButton(
+            // onPressed: sendFCMMessage,
+            onPressed: null,
+            child: Text("Send") 
+          )
+        ],
+      ),
+    );
+  }
+
+  void startCall() {
+    final message = Message.call(person);
+
+    setState(() {
+      messages.add(message);
+    });
+
+    Get.toNamed("/call", arguments: CallDetails.fromUserInfo(person, CallType.video).toMap());
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    person = Get.arguments;
+  }
+
+}
