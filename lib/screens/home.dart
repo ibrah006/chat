@@ -2,7 +2,6 @@
 
 import 'package:chat/constants/developer_debug.dart';
 import 'package:chat/constants/dialogs.dart';
-import 'package:chat/constants/sample_fcm_tokens.dart';
 import 'package:chat/databases/local_database.dart';
 import 'package:chat/databases/tables.dart';
 import 'package:chat/main.dart';

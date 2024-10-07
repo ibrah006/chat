@@ -1,3 +1,4 @@
+import 'package:chat/constants/serviceAccCred.dart';
 import 'package:chat/screens/call.dart';
 import 'package:chat/screens/chat.dart';
 import 'package:chat/screens/home.dart';
@@ -17,9 +18,16 @@ late final String currentDeviceFCMToken;
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+/// headline TODOs
+/// 1. fix dotenv not working
+/// 2. fix fb secret restricted
+
 void main(List<String> args) async {
+  
   WidgetsFlutterBinding.ensureInitialized();
 
+  await ServiceAccCred.intializeSecret();
+  
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
