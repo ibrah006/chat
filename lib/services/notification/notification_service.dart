@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:chat/main.dart';
+import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -21,7 +22,10 @@ void handleMessage(RemoteMessage message) {
 
   //TODO: check to see if it's a call notification before executing the below
 
-  Get.toNamed("/call",);
+  final payload = Map.of(message.data);
+  payload["isCaller"] = false;
+
+  Get.toNamed("/call", arguments: payload);
 }
 
 class NotificationService {

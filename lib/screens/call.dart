@@ -29,8 +29,6 @@ class CallScreen extends MainWrapperStateful {
 
   late final CallDetails callDetails;
 
-  
-
   @override
   void dispose() {
     super.dispose();
@@ -92,7 +90,7 @@ class CallScreen extends MainWrapperStateful {
     await initCamera();
 
     // TODO: fix this function and uncomment
-    // autoManageCallState();
+    autoManageCallState(false);
 
     sendFCMMessage();
   }
@@ -193,7 +191,8 @@ class CallScreen extends MainWrapperStateful {
     await SendPushNotification().sendNotification(
       info: NotificationInfo(
         notiTitle, notiBody, callDetails.fcmToken, type: NotificationType.call
-      )
+      ),
+      details: callDetails
     );
   }
 

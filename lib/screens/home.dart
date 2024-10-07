@@ -162,7 +162,8 @@ class HomeScreen extends MainWrapperStateful {
                   SendPushNotification().sendNotification(
                     info: NotificationInfo(
                       "Sample notification title", "sample body", fcmRadioOption, type: NotificationType.call
-                    )
+                    ),
+                    details: Person("sample", "sample@mail.com", fcmToken: fcmRadioOption)
                   );
                 },
                 child: Text("Send FCM notification")

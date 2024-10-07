@@ -12,7 +12,7 @@ class CallDetails extends Person implements NotificationInfo {
 
   final CallType callType;
 
-  static CallDetails fromUserInfo(Person userInfo, CallType callType_) {
+  static CallDetails fromUserInfo(Person userInfo, CallType callType_, {bool? isCaller_}) {
     return CallDetails(userInfo.uid!, userInfo.email!, userInfo.fcmToken, callType: callType_, displayName: userInfo.displayName);
   }
 
@@ -36,7 +36,7 @@ class CallDetails extends Person implements NotificationInfo {
       map["email"],
       map["fcmToken"]?? map["token"],
       callType: CallType.values[callTypes.indexOf(map["callType"])],
-      displayName: map["displayName"]
+      displayName: map["displayName"],
     );
   }
 

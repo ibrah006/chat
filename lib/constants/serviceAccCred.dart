@@ -14,5 +14,6 @@ class ServiceAccCred {
     // print("google api secret: ${env.name}");
     // print(env.blah);
     secret = await Env.load();
+    print("google api secret: $secret");
   }
 }

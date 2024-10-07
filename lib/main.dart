@@ -19,8 +19,10 @@ late final String currentDeviceFCMToken;
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// headline TODOs
-/// 1. fix dotenv not working
-/// 2. fix fb secret restricted
+/// 1. fix dotenv not working ✅
+/// 2. fix fb secret restricted ✅
+/// 3. fix on notification click not naavigating to app ✅
+/// 4. fix calling. and handling states properly. pass in the roomId in payload
 
 void main(List<String> args) async {
   

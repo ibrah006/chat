@@ -11,7 +11,6 @@ import 'package:get/get.dart';
 
 class ChatScreen extends MainWrapperStateful {
 
-
   late Person person;
 
   final TextEditingController messageController = TextEditingController();
@@ -56,7 +55,7 @@ class ChatScreen extends MainWrapperStateful {
       messages.add(message);
     });
 
-    Get.toNamed("/call", arguments: CallDetails.fromUserInfo(person, CallType.video).toMap());
+    Get.toNamed("/call", arguments: CallDetails.fromUserInfo(person, CallType.video, isCaller_: true).toMap());
   }
 
   @override

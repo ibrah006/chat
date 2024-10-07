@@ -2,7 +2,17 @@
 import 'package:chat/services/notification/send_notification.dart';
 
 class NotificationConstants {
-  static Map<String, dynamic> getNotificationPayload(NotificationInfo details) {
+  static Map<String, dynamic> getNotificationPayload(NotificationInfo details, {required Map data}) {
+    return {
+      "message": {
+        "token": details.fcmToken,
+        "notification": {
+          "title": details.title,
+          "body": details.body
+        },
+        "data": data
+      },
+    };
     return {
       "message": {
         "token": details.fcmToken,
