@@ -25,6 +25,11 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 4. pass in the roomId in payload. 🧪 NEEDED ✅`
 /// 5. fix calling. and handling states properly. 
 /// 6. handle call end states
+/// 
+/// 
+/// Two end states to manage:
+/// 1. when the host leaves
+/// 2. when the guest user leaves
 
 void main(List<String> args) async {
   

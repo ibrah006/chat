@@ -1,5 +1,6 @@
 
 
+import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
 import 'package:chat/constants/dialogs.dart';
 import 'package:chat/databases/local_database.dart';
@@ -14,6 +15,7 @@ import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/list_notifier.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -25,9 +27,12 @@ class HomeScreen extends MainWrapperStateful {
 
   late String fcmRadioOption;
 
+  final DeveloperDebug debug = DeveloperDebug();
+
+  final Stopwatch sinceStart = Stopwatch();
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     // TODO: show a loading screen until this future is completed 
@@ -37,9 +42,15 @@ class HomeScreen extends MainWrapperStateful {
       });
     });
 
-    
+    sinceStart.start();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+
+    sinceStart.stop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -154,8 +165,19 @@ class HomeScreen extends MainWrapperStateful {
             )
           ),
 
+          ListTile(
+            leading: Checkbox(
+              value: debug.showTimeSinceStart,
+              onChanged: (newValue)=> setState(() {
+                debug.toggleShowTimeSinceStart(newState: newValue);
+              })
+            ),
+            title: Text("${debug.showTimeSinceStart? "Hide" : "Show"} time since.", style: TextStyle(fontSize: 12.5),),
+            trailing: debug.showTimeSinceStart? Text(DateManager.getDuration(sinceStart.elapsed)) : null
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               ElevatedButton(
                 onPressed: () {
@@ -166,8 +188,14 @@ class HomeScreen extends MainWrapperStateful {
                     details: Person("sample", "sample@mail.com", fcmToken: fcmRadioOption)
                   );
                 },
-                child: Text("Send FCM notification")
+                style: const ButtonStyle(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  padding: WidgetStatePropertyAll(EdgeInsets.all(5)),
+                  minimumSize: WidgetStatePropertyAll(Size.zero)
+                ),
+                child: Text("Send FCM notification", style: TextStyle(fontSize: 12.5),)
               ),
+              // show/hide time since checkbox
               PopupMenuButton(
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
@@ -187,7 +215,9 @@ class HomeScreen extends MainWrapperStateful {
                         value: index,
                         child: ListTile(
                           dense: true,
-                          leading: Icon([Icons.dataset][index]),
+                          leading: [
+                            Icon(Icons.dataset),
+                          ][index],
                           contentPadding: EdgeInsets.zero,
                           onTap: () async {
                             final positiveClicked = await Dialogs.showAlertDialog(

@@ -33,7 +33,7 @@ class CallScreen extends MainWrapperStateful {
   void dispose() {
     super.dispose();
 
-    diposeSignal();
+    disposeSignal();
   }
   
   
@@ -59,7 +59,13 @@ class CallScreen extends MainWrapperStateful {
     });
   }
 
-  diposeSignal() async {
+  void hangUp() {
+    disposeSignal().then((value) {
+      Navigator.pop(context);
+    });
+  }
+
+  disposeSignal() async {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
 
@@ -113,7 +119,7 @@ class CallScreen extends MainWrapperStateful {
                         switch(index) {
                           case 0: autoManageCallState();
                           case 1: autoManageCallState();
-                          case 2: diposeSignal();
+                          case 2: hangUp();
                           // case 3: sendFCMMessage();
                         }
                       },

@@ -7,6 +7,13 @@ import 'package:sqflite/sqflite.dart';
 
 class DeveloperDebug {
 
+  bool showTimeSinceStart = false;
+
+  /// show time since the app started/restarted
+  void toggleShowTimeSinceStart({bool? newState}) {
+    showTimeSinceStart = newState?? !showTimeSinceStart;
+  }
+
   static Future deleteDatabase() async {
 
     print("delete databsaes selected");
