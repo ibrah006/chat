@@ -3,7 +3,9 @@
 
 import 'dart:convert';
 
+import 'package:chat/constants/basic_bloc.dart';
 import 'package:chat/services/call/call_details.dart';
+import 'package:chat/services/call/call_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -27,6 +29,8 @@ class Signaling {
   String? roomId;
   String? currentRoomText;
   StreamStateCallback? onAddRemoteStream;
+
+  final BasicBloc<CallState> callEndStateHandler = BasicBloc<CallState>();
 
   Future<void> _initVideoToRemote({required FirebaseFirestore db, required DocumentReference roomRef}) async {
 
@@ -81,9 +85,16 @@ class Signaling {
 
     // Listening for remote session description below
     roomRef.snapshots().listen((snapshot) async {
-      print('Got updated room: ${snapshot.data()}');
 
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      final updatedRoom = snapshot.data();
+      print('Got updated room: $updatedRoom');
+
+      if (updatedRoom==null) {
+        callEndStateHandler.sink.add(CallState.ended);
+        return;
+      }
+
+      Map<String, dynamic> data = updatedRoom as Map<String, dynamic>;
       if (peerConnection?.getRemoteDescription() != null &&
           data['answer'] != null) {
 
@@ -94,6 +105,8 @@ class Signaling {
 
         print("Someone tried to connect");
         await peerConnection?.setRemoteDescription(answer);
+
+        callEndStateHandler.sink.add(CallState.talking);
       }
     });
     // Listening for remote session description above

@@ -1,6 +1,5 @@
+import 'package:chat/services/call/call_state.dart';
 import 'package:flutter/material.dart';
-
-enum CallState { incoming, ongoing, missed, ended }
 
 class CallBubble extends StatelessWidget {
   final CallState callState; // The state of the call (ongoing/incoming, missed, or ended)

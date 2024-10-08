@@ -1,5 +1,6 @@
 import 'package:chat/main.dart';
 import 'package:chat/services/call/call_details.dart';
+import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/call/signalling.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
@@ -59,7 +60,10 @@ class CallScreen extends MainWrapperStateful {
     });
   }
 
-  void hangUp() {
+  /// delayed is important property. should be true when received call end state is received from StreamBuilder
+  void hangUp({bool delayed = false}) async {
+    if (delayed) await Future.delayed(Duration(seconds: 2));
+
     disposeSignal().then((value) {
       Navigator.pop(context);
     });
@@ -105,81 +109,93 @@ class CallScreen extends MainWrapperStateful {
     // super.buildinit(context);
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: List.generate(
-                  4,
-                  (index) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        switch(index) {
-                          case 0: autoManageCallState();
-                          case 1: autoManageCallState();
-                          case 2: hangUp();
-                          // case 3: sendFCMMessage();
-                        }
-                      },
-                      style: index==2? const ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(Colors.red)
-                      ) : null,
-                      child: Text(["join room", "create room", "end call", "Send notification"][index])
-                    );
-                  }
-                )
-              ),
-            ),
-            ListTile(
-              leading: Container(
-                color: Colors.yellow,
-                height: 20,
-                width: 20,
-              ),
-              trailing: Text("current user"),
-            ),
+        child: StreamBuilder<CallState>(
+          initialData: CallState.incoming,
+          stream: signaling.callEndStateHandler.stream,
+          builder: (context, AsyncSnapshot<CallState> snapshot) {
 
-            Row(
-              children: List.generate(
-                2, (index) {
-                  return Expanded(
-                    child: SizedBox(
-                        height: 300,
-                        child: Container(
-                            decoration: BoxDecoration(
-                              border: index==0? Border.all(
-                                color: Colors.yellow,
-                                width: 4
-                              ) : null
-                            ),
-                            child: RTCVideoView([_localRenderer, _remoteRenderer][index])
-                        )
-                    ),
-                  );
-                }
-              )
-            ),
-        
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: Row(
-                children: [
-                  Expanded(child: TextField(
-                    controller: roomController,
-                  )),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      //copy room id
-                    },
-                    label: Text("Copy"),
-                    icon: Icon(Icons.copy),
+            if (snapshot.data == CallState.ended) {
+              hangUp(delayed: true);
+              return const Center(child: Text("Call ended"));
+            }
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(
+                      4,
+                      (index) {
+                        return ElevatedButton(
+                          onPressed: () {
+                            switch(index) {
+                              case 0: autoManageCallState();
+                              case 1: autoManageCallState();
+                              case 2: hangUp();
+                              // case 3: sendFCMMessage();
+                            }
+                          },
+                          style: index==2? const ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(Colors.red)
+                          ) : null,
+                          child: Text(["join room", "create room", "end call", "Send notification"][index])
+                        );
+                      }
+                    )
+                  ),
+                ),
+                ListTile(
+                  leading: Container(
+                    color: Colors.yellow,
+                    height: 20,
+                    width: 20,
+                  ),
+                  trailing: Text("current user"),
+                ),
+            
+                Row(
+                  children: List.generate(
+                    2, (index) {
+                      return Expanded(
+                        child: SizedBox(
+                            height: 300,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: index==0? Border.all(
+                                    color: Colors.yellow,
+                                    width: 4
+                                  ) : null
+                                ),
+                                child: RTCVideoView([_localRenderer, _remoteRenderer][index])
+                            )
+                        ),
+                      );
+                    }
                   )
-                ],
-              ),
-            )
-          ],
+                ),
+            
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Row(
+                    children: [
+                      Expanded(child: TextField(
+                        controller: roomController,
+                      )),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          //copy room id
+                        },
+                        label: Text("Copy"),
+                        icon: Icon(Icons.copy),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          }
         ),
       )
     );
@@ -221,6 +237,8 @@ class CallScreen extends MainWrapperStateful {
 
       sendFCMMessage();
     } else {
+
+      signaling.callEndStateHandler.sink.add(CallState.talking);
 
       await signaling.joinRoom(
         callDetails.roomId!,
