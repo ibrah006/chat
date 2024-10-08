@@ -25,6 +25,8 @@ void handleMessage(RemoteMessage message) {
   final payload = Map.of(message.data);
   payload["isCaller"] = false;
 
+  print("payload received: $payload");
+
   Get.toNamed("/call", arguments: payload);
 }
 

@@ -22,7 +22,9 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 1. fix dotenv not working ✅
 /// 2. fix fb secret restricted ✅
 /// 3. fix on notification click not naavigating to app ✅
-/// 4. fix calling. and handling states properly. pass in the roomId in payload
+/// 4. pass in the roomId in payload. 🧪 NEEDED ✅`
+/// 5. fix calling. and handling states properly. 
+/// 6. handle call end states
 
 void main(List<String> args) async {
   

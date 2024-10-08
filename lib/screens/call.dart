@@ -90,9 +90,7 @@ class CallScreen extends MainWrapperStateful {
     await initCamera();
 
     // TODO: fix this function and uncomment
-    autoManageCallState(false);
-
-    sendFCMMessage();
+    autoManageCallState();
   }
 
 
@@ -113,8 +111,8 @@ class CallScreen extends MainWrapperStateful {
                     return ElevatedButton(
                       onPressed: () {
                         switch(index) {
-                          case 0: autoManageCallState(false);
-                          case 1: autoManageCallState(true);
+                          case 0: autoManageCallState();
+                          case 1: autoManageCallState();
                           case 2: diposeSignal();
                           // case 3: sendFCMMessage();
                         }
@@ -183,10 +181,14 @@ class CallScreen extends MainWrapperStateful {
 
   Future<void> sendFCMMessage() async {
 
+    callDetails.initializeRoomId(roomId!);
+
     // print("currentUserToken: $currentDeviceFCMToken \n toUserToken: $messageToToken");
 
     final notiTitle = callDetails.displayName!;
     final notiBody = "Invites you to a ${callDetails.callType == CallType.audio? "Audio" : "Video"} call";
+
+    print("roomId from calldetails: ${callDetails.roomId}");
 
     await SendPushNotification().sendNotification(
       info: NotificationInfo(
@@ -197,7 +199,10 @@ class CallScreen extends MainWrapperStateful {
   }
 
 
-  Future<void> autoManageCallState(bool isCaller) async {
+  Future<void> autoManageCallState() async {
+
+    // below line decides if the user is caller or callee
+    final isCaller = callDetails.roomId == null;
 
     if (isCaller) {
       roomId = await signaling.createRoom(_remoteRenderer, CALLTYPE, friend: ROOMOWNER);
@@ -207,10 +212,12 @@ class CallScreen extends MainWrapperStateful {
       await Clipboard.setData(ClipboardData(text: roomId!));
 
       initInProgress = false;
+
+      sendFCMMessage();
     } else {
 
       await signaling.joinRoom(
-        roomController.text,
+        callDetails.roomId!,
         _remoteRenderer,
         currentuser: ROOMOWNER
       );

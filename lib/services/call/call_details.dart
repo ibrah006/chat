@@ -12,8 +12,14 @@ class CallDetails extends Person implements NotificationInfo {
 
   final CallType callType;
 
+  String? roomId;
+
   static CallDetails fromUserInfo(Person userInfo, CallType callType_, {bool? isCaller_}) {
     return CallDetails(userInfo.uid!, userInfo.email!, userInfo.fcmToken, callType: callType_, displayName: userInfo.displayName);
+  }
+
+  void initializeRoomId(String id) {
+    roomId = id;
   }
 
   @override
@@ -23,21 +29,27 @@ class CallDetails extends Person implements NotificationInfo {
       "email": email,
       "fcmToken": fcmToken,
       "callType": callType.name,
-      "displayName": displayName
+      "displayName": displayName,
+      "roomId": roomId
     };
   }
 
   static CallDetails fromMap(Map map) {
     final callTypes = CallType.values.map((e)=> e.name).toList();
 
-
-    return CallDetails(
+    final instance = CallDetails(
       map["uid"],
       map["email"],
       map["fcmToken"]?? map["token"],
       callType: CallType.values[callTypes.indexOf(map["callType"])],
       displayName: map["displayName"],
     );
+
+    try {
+      instance.initializeRoomId(map["roomId"]);
+    } catch(e) {}
+
+    return instance;
   }
 
   @override

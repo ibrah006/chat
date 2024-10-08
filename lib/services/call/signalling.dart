@@ -128,8 +128,9 @@ class Signaling {
   Future<void> joinRoom(String joinRoomId, RTCVideoRenderer remoteVideo, {required String currentuser}) async {
     roomId = joinRoomId;
     FirebaseFirestore db = FirebaseFirestore.instance;
+
     print("join room id: $roomId");
-    DocumentReference roomRef = db.collection(currentuser).doc('$roomId');
+    DocumentReference roomRef = db.collection(currentuser).doc('$roomId'); 
     var roomSnapshot = await roomRef.get();
     print('Got room ${roomSnapshot.exists}');
 
