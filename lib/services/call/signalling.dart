@@ -12,6 +12,9 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 typedef void StreamStateCallback(MediaStream stream);
 
 class Signaling {
+
+  late final String roomOwner; 
+
   Map<String, dynamic> configuration = {
     'iceServers': [
       {
@@ -76,6 +79,8 @@ class Signaling {
     FirebaseFirestore db = FirebaseFirestore.instance;
     DocumentReference roomRef = db.collection(friend).doc();
 
+    roomOwner = friend;
+
     print('Create PeerConnection with configuration: $configuration');
 
     peerConnection = await createPeerConnection(configuration);
@@ -139,6 +144,9 @@ class Signaling {
   }
 
   Future<void> joinRoom(String joinRoomId, RTCVideoRenderer remoteVideo, {required String currentuser}) async {
+
+    roomOwner = currentuser;
+
     roomId = joinRoomId;
     FirebaseFirestore db = FirebaseFirestore.instance;
 
@@ -228,15 +236,7 @@ class Signaling {
   }
 
   Future<void> hangUp(RTCVideoRenderer localVideo, {required String caller}) async {
-    List<MediaStreamTrack> tracks = localVideo.srcObject!.getTracks();
-    tracks.forEach((track) {
-      track.stop();
-    });
-
-    if (remoteStream != null) {
-      remoteStream!.getTracks().forEach((track) => track.stop());
-    }
-    if (peerConnection != null) peerConnection!.close();
+    _startCallEnd(localVideo);
 
     print("roomId on ending call: $roomId");
     if (roomId != null) {
@@ -251,10 +251,32 @@ class Signaling {
       await roomRef.delete();
     }
 
-    localStream!.dispose();
-    remoteStream?.dispose();
+    _disposeLocalAndRemoteStreams();
 
     roomId = null;
+  }
+
+  void hostUserOnEnd(RTCVideoRenderer localVideo) {
+    _startCallEnd(localVideo);
+
+    _disposeLocalAndRemoteStreams();
+  }
+
+  _startCallEnd(RTCVideoRenderer localVideo) {
+    List<MediaStreamTrack> tracks = localVideo.srcObject!.getTracks();
+    tracks.forEach((track) {
+      track.stop();
+    });
+
+    if (remoteStream != null) {
+      remoteStream!.getTracks().forEach((track) => track.stop());
+    }
+    if (peerConnection != null) peerConnection!.close();
+  }
+
+  _disposeLocalAndRemoteStreams() {
+    localStream!.dispose();
+    remoteStream?.dispose();
   }
 
   void registerPeerConnectionListeners() {
@@ -274,7 +296,7 @@ class Signaling {
       print('ICE connection state change: $state');
     };
 
-    peerConnection?.onAddStream = (MediaStream stream) {
+    peerConnection?.onAddStream = (MediaStream stream) async {
       print("Add remote stream");
       onAddRemoteStream?.call(stream);
       remoteStream = stream;

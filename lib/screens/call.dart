@@ -5,6 +5,7 @@ import 'package:chat/services/call/signalling.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/widget_main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -29,6 +30,8 @@ class CallScreen extends MainWrapperStateful {
   // StreamSubscription? callListener;
 
   late final CallDetails callDetails;
+
+  bool? isCaller;
 
   @override
   void dispose() {
@@ -62,7 +65,12 @@ class CallScreen extends MainWrapperStateful {
 
   /// delayed is important property. should be true when received call end state is received from StreamBuilder
   void hangUp({bool delayed = false}) async {
-    if (delayed) await Future.delayed(Duration(seconds: 2));
+    if (delayed) await Future.delayed(Duration(seconds: 4));
+
+    // setting the document fields like this will overwrite the exisintg fields. MEANING THE 'offer' WILL BE GONE. Which is ok because the call is no longer needed.
+    FirebaseFirestore.instance.collection(ROOMOWNER).doc(roomId).set({
+      "isCallerEnded": true
+    });
 
     disposeSignal().then((value) {
       Navigator.pop(context);
@@ -73,10 +81,14 @@ class CallScreen extends MainWrapperStateful {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
 
-    try {
-      signaling.hangUp(_localRenderer, caller: ROOMOWNER);
-    } catch(e) {
-      print("not in call to hand up");
+    if (!isCaller!) {
+      try {
+        signaling.hangUp(_localRenderer, caller: ROOMOWNER);
+      } catch(e) {
+        print("not in call to hand up");
+      }
+    } else {
+      signaling.hostUserOnEnd(_localRenderer);
     }
   }
 
@@ -106,6 +118,7 @@ class CallScreen extends MainWrapperStateful {
 
   @override
   Widget build(BuildContext context) {
+
     // super.buildinit(context);
     return Scaffold(
       body: SafeArea(
@@ -224,9 +237,9 @@ class CallScreen extends MainWrapperStateful {
   Future<void> autoManageCallState() async {
 
     // below line decides if the user is caller or callee
-    final isCaller = callDetails.roomId == null;
+    isCaller = callDetails.roomId == null;
 
-    if (isCaller) {
+    if (isCaller!) {
       roomId = await signaling.createRoom(_remoteRenderer, CALLTYPE, friend: ROOMOWNER);
         // await signaling.createRoom(_remoteRenderer);
       roomController.text = roomId!;
@@ -245,6 +258,14 @@ class CallScreen extends MainWrapperStateful {
         _remoteRenderer,
         currentuser: ROOMOWNER
       );
+
+      FirebaseFirestore.instance.collection(ROOMOWNER).doc(signaling.roomId).snapshots().listen((docSnapshot) {
+        final isEndedByCaller = docSnapshot.get("isCallerEnded");
+        if (isEndedByCaller == true) {
+          signaling.callEndStateHandler.sink.add(CallState.ended);
+          return;
+        }
+      });
     }
     
     setState(() {});

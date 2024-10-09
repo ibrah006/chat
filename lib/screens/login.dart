@@ -13,7 +13,8 @@ class LoginScreen extends MainWrapperStateful {
 
   static const Iterable _quickLogins = [
     "ibrah@chatly.com",
-    "dell@chatly.com"
+    "dell@chatly.com",
+    "flutteremu@chatly.com"
   ];
 
 
