@@ -34,6 +34,17 @@ class CallDetails extends Person implements NotificationInfo {
     };
   }
 
+  CallDetails copyFrom(Person person) {
+    return CallDetails(
+      person.uid?? uid!,
+      person.email?? email!,
+      person.fcmToken,
+      callType: callType,
+      displayName: person.displayName?? displayName)
+        ..initializeRoomId(roomId!)
+        ..debugErrorFromPast = person.debugErrorFromPast;
+  }
+
   static CallDetails fromMap(Map map) {
     final callTypes = CallType.values.map((e)=> e.name).toList();
 

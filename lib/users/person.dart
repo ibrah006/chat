@@ -1,7 +1,9 @@
 
 
+import 'package:chat/main.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Person implements NotificationInfo {
   Person(this.uid, this.email, {this.displayName, required this.fcmToken}) {
@@ -31,6 +33,12 @@ class Person implements NotificationInfo {
     print("Person (class): requested convert from map: $map");
 
     return Person(map["uid"]?? map["localId"], map["email"], displayName: map["displayName"], fcmToken: map["fcmToken"]?? "");
+  }
+
+  /// Get the Person instance for the current user from FirebaseAuth
+  static Person fromFirebaseAuth(FirebaseAuth auth) {
+    final currentUser = auth.currentUser!;
+    return Person(currentUser.uid, currentUser.email, fcmToken: currentDeviceFCMToken);
   }
 
   Map<String, dynamic> toMap() {

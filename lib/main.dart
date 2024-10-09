@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-const ROOMOWNER = 'mohammed';
+// const ROOMOWNER = 'mohammed';
 const CALLTYPE = CallType.video;
 
 late final String currentDeviceFCMToken;
@@ -25,9 +25,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 4. pass in the roomId in payload. 🧪 NEEDED ✅
 /// 5. fix calling. and handling states properly. 
 /// 6. handle call end states ✅
-/// 7. MAKE SURE TO KEEP THE LINE BUSY IF USER IS IN CALL AND CLEAR THE LINE PROPERLY AFTER CALL
+/// 7. FIX THE FUNCTION CallDetails().copyFrom(...) ⚠️⚠️⚠️ CURRENT TASK
+/// 8. MAKE SURE TO KEEP THE LINE BUSY IF USER IS IN CALL AND CLEAR THE LINE PROPERLY AFTER CALL
 /// Take care of below AFTER REMOVING CONSTANT ROOMOWNER ID/NAME.
-/// 8. If User A has User B and B doesn't have A and if A tries to call/message B, take care of possible errors (in User B) due to no friend uid in local database.
+/// 9. If User A has User B and B doesn't have A and if A tries to call/message B, take care of possible errors (in User B) due to no friend uid in local database.
 /// 
 /// 
 /// Two end states to manage:
