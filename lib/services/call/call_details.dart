@@ -3,6 +3,7 @@ import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
+import 'package:flutter/material.dart';
 
 enum CallType {
   video, audio
@@ -64,13 +65,14 @@ class CallDetails extends Person implements NotificationInfo {
 
   static CallDetails fromMap(Map map) {
     final callTypes = CallType.values.map((e)=> e.name).toList();
+    final callStates = CallState.values.map((e)=> e.name).toList();;
 
     final instance = CallDetails(
       map["uid"],
       map["email"],
       map["fcmToken"]?? map["token"],
       callType: CallType.values[callTypes.indexOf(map["callType"])],
-      state: map["state"]?? CallState.ended,
+      state: CallState.values[callStates.indexOf(map["state"])]?? CallState.ended,
       displayName: map["displayName"],
       timestamp: map["datetime"]
     );
@@ -96,10 +98,11 @@ class CallDetails extends Person implements NotificationInfo {
   @override
   // TODO: implement type
   NotificationType get type {
-    final List<String> notiTypes = NotificationType.values.toList().map((e)=> e.name).toList();
-    final int notiTypeIndex = notiTypes.indexOf(callType.name);
-
-    return NotificationType.values[notiTypeIndex];
+    if (callType == CallType.video) {
+      return NotificationType.videoCall;
+    } else {
+      return NotificationType.call;
+    }
   }
   
   @override

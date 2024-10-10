@@ -6,7 +6,6 @@ import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -73,11 +72,6 @@ class CallScreen extends MainWrapperStateful {
   void hangUp({bool delayed = false}) async {
     if (delayed) await Future.delayed(Duration(seconds: 4));
 
-    // setting the document fields like this will overwrite the exisintg fields. MEANING THE 'offer' WILL BE GONE. Which is ok because the call is no longer needed.
-    FirebaseFirestore.instance.collection(roomOwner).doc(roomId).set({
-      "isCallerEnded": true
-    });
-
     disposeSignal().then((value) {
       Navigator.pop(context);
     });
@@ -87,14 +81,10 @@ class CallScreen extends MainWrapperStateful {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
 
-    if (!isCaller!) {
-      try {
-        signaling.hangUp(_localRenderer, caller: roomOwner);
-      } catch(e) {
-        print("not in call to hand up");
-      }
-    } else {
-      signaling.hostUserOnEnd(_localRenderer);
+    try {
+      signaling.hangUp(_localRenderer, caller: roomOwner);   
+    } catch(e) {
+      print("not in call to hand up");
     }
   }
 
@@ -130,7 +120,7 @@ class CallScreen extends MainWrapperStateful {
       body: SafeArea(
         child: StreamBuilder<CallState>(
           initialData: CallState.incoming,
-          stream: signaling.callEndStateHandler.stream,
+          stream: signaling.callStateHandler.stream,
           builder: (context, AsyncSnapshot<CallState> snapshot) {
 
             if (snapshot.data == CallState.ended) {
@@ -261,21 +251,13 @@ class CallScreen extends MainWrapperStateful {
       sendFCMMessage();
     } else {
 
-      signaling.callEndStateHandler.sink.add(CallState.talking);
+      signaling.callStateHandler.sink.add(CallState.talking);
 
       await signaling.joinRoom(
         callDetails.roomId!,
         _remoteRenderer,
         currentuser: roomOwner
       );
-
-      FirebaseFirestore.instance.collection(roomOwner).doc(signaling.roomId).snapshots().listen((docSnapshot) {
-        final isEndedByCaller = docSnapshot.get("isCallerEnded");
-        if (isEndedByCaller == true) {
-          signaling.callEndStateHandler.sink.add(CallState.ended);
-          return;
-        }
-      });
     }
     
     setState(() {});

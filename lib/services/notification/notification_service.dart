@@ -76,24 +76,6 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-
-    FirebaseMessaging.onMessage.listen((message) {
-      final notification = message.notification;
-
-      // TOOD: check this - i think when notification somehow ends up begin null then no more notifications will be shown as we've retruned from the function
-      if (notification==null) return;
-
-      
-      _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        NotificationDetails(
-          android: _androidNotificationDetails
-        ),
-        payload: jsonEncode(message.toMap())
-      ); 
-    });
   }
 
   static Future initLocalNotifications() async {
@@ -136,3 +118,13 @@ class NotificationService {
   }
 
 }
+
+// _localNotifications.show(
+//         notification.hashCode,
+//         notification.title,
+//         notification.body,
+//         NotificationDetails(
+//           android: _androidNotificationDetails
+//         ),
+//         payload: jsonEncode(message.toMap())
+//       );

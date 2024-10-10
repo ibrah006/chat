@@ -36,6 +36,12 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 1. when the host leaves. ✅
 /// 2. when the guest user leaves. 🧪 NEEDED. ✅
 ///  FURTHER TESTING REQUIRED for bth sub states before commiting and updating the branch ⚠️. ✅
+/// 
+
+/// 👉 MINOR BUG TO FIX BEFORE COMMITING FROM HANDLINGCALLSTATES BRANCH TO MAIN
+/// 1. HOME SCREEN DEV RADIO FOR SENDING SAMPLE FCM MESSAGE. RADIO NOT WORKING. ✅
+/// 2. YET ANOTHER CALL STATE END TO MANAGE. WHEN HOST USER CANCELS CALL. 
+/// 3. WHEN LEFT CALL SHOULD SHOW "CALL ENDED" IN CHAT SCREEN. BASICALLY UPDATE THE CALL MESSAGE.
 
 void main(List<String> args) async {
   

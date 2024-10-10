@@ -1,5 +1,4 @@
 
-
 import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
 import 'package:chat/constants/dialogs.dart';
@@ -13,9 +12,11 @@ import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/list_notifier.dart';
+import 'package:chat/components/custom_radios.dart';
+import 'package:get/get_connect/sockets/src/socket_notifier.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -40,6 +41,14 @@ class HomeScreen extends MainWrapperStateful {
       setState(() {
         friends = Person.fromIterableMap(rawFriends);
       });
+    });
+
+    FirebaseMessaging.onMessage.listen((message) {
+      final notification = message.notification;
+
+      // TOOD: check this - i think when notification somehow ends up begin null then no more notifications will be shown as we've retruned from the function
+      if (notification==null) return;
+      
     });
 
     sinceStart.start();
@@ -82,7 +91,10 @@ class HomeScreen extends MainWrapperStateful {
             ],
           ),
           Expanded(
-            child: ListView(
+            child: CustomRadios(
+              onChanged: (index) {
+                fcmRadioOption = friends[index].fcmToken;
+              },
               children: List.generate(
                 friends.length,
                 (index) {
@@ -92,75 +104,56 @@ class HomeScreen extends MainWrapperStateful {
                   final String userFcmToken = friend.fcmToken;
                   final bool showFcmWarning = userFcmToken.isEmpty;
 
-                  if (index==0) fcmRadioOption = userFcmToken;
-
                   print("friend: ${friend.toMap()}");
 
-                  return Row(
-                    
-                    children: [
-                      Radio<String>(
-                        value: userFcmToken,
-                        groupValue: fcmRadioOption,
-                        onChanged: (value) {
-                          print("new radio value: $value");
-                          setState(() {
-                            fcmRadioOption = value!;
-                          });
-                        },
-                      ),
-                      Expanded(
-                        child: ListTile(
-                          leading: !showFcmWarning? null : Stack(
-                            alignment: Alignment.topCenter,
-                            children: [
-                              Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
-                              Padding(
-                                padding: EdgeInsets.only(top: 10),
-                                child: TextButton(
-                                  style: ButtonStyle(
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    minimumSize: WidgetStatePropertyAll(Size.zero),
-                                    padding: WidgetStatePropertyAll(EdgeInsets.zero)
-                                  ),
-                                  onPressed: ()=> refreshFcmToken(index, friend.email!),
-                                  child: Icon(Icons.refresh_rounded,),
-                                )
-                              )
-                            ],
-                          ),
-                          title: Row(
-                            children: [
-                              Text(friend.displayName?? "N/A display name"),
-                              ... showFcmWarning? [
-                                SizedBox(width: 13),
-                                Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-                                Icon(Icons.warning_rounded, color: Colors.red.shade400)
-                              ] : []
-                            ],
-                          ),
-                          subtitle: Text(friend.email.toString()),
-                          onTap: () {
-                            Get.toNamed("/chat", arguments: friend);
-                          },
-                          trailing: IconButton(
-                            onPressed: () {
-                              // send notifcation about the call
+                  return ListTile(
+                    leading: !showFcmWarning? null : Stack(
+                      alignment: Alignment.topCenter,
+                      children: [
+                        Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
+                        Padding(
+                          padding: EdgeInsets.only(top: 10),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              minimumSize: WidgetStatePropertyAll(Size.zero),
+                              padding: WidgetStatePropertyAll(EdgeInsets.zero)
+                            ),
+                            onPressed: ()=> refreshFcmToken(index, friend.email!),
+                            child: Icon(Icons.refresh_rounded,),
+                          )
+                        )
+                      ],
+                    ),
+                    title: Row(
+                      children: [
+                        Text(friend.displayName?? "N/A display name"),
+                        ... showFcmWarning? [
+                          SizedBox(width: 13),
+                          Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                          Icon(Icons.warning_rounded, color: Colors.red.shade400)
+                        ] : []
+                      ],
+                    ),
+                    subtitle: Text(friend.email.toString()),
+                    onTap: () {
+                      Get.toNamed("/chat", arguments: friend);
+                    },
+                    trailing: IconButton(
+                      onPressed: () {
+                        // send notifcation about the call
+                  
+                        Get.toNamed(
+                          "/call",
+                          arguments: CallDetails.fromUserInfo(friend, CALLTYPE).toMap()
+                        );
+                  
+                        //sendFCMMessage();
                         
-                              Get.toNamed(
-                                "/call",
-                                arguments: CallDetails.fromUserInfo(friend, CALLTYPE).toMap()
-                              );
-                        
-                              //sendFCMMessage();
-                              
-                              // TODO: send this notification after intiating the call
-                            },
-                            icon: Icon(Icons.video_call_rounded),
-                          ),
-                        ),
-                      ),
-                    ],
+                        // TODO: send this notification after intiating the call
+                      },
+                      icon: Icon(Icons.video_call_rounded),
+                    ),
                   );
                 }
               )

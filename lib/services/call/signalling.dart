@@ -33,7 +33,9 @@ class Signaling {
   String? currentRoomText;
   StreamStateCallback? onAddRemoteStream;
 
-  final BasicBloc<CallState> callEndStateHandler = BasicBloc<CallState>();
+  final BasicBloc<CallState> callStateHandler = BasicBloc<CallState>();
+
+  bool isRemoteUserConnected = false;
 
   Future<void> _initVideoToRemote({required FirebaseFirestore db, required DocumentReference roomRef}) async {
 
@@ -95,7 +97,7 @@ class Signaling {
       print('Got updated room: $updatedRoom');
 
       if (updatedRoom==null) {
-        callEndStateHandler.sink.add(CallState.ended);
+        // remote user disconnected/hungup
         return;
       }
 
@@ -111,7 +113,7 @@ class Signaling {
         print("Someone tried to connect");
         await peerConnection?.setRemoteDescription(answer);
 
-        callEndStateHandler.sink.add(CallState.talking);
+        callStateHandler.sink.add(CallState.talking);
       }
     });
     // Listening for remote session description above
@@ -284,8 +286,35 @@ class Signaling {
       print('ICE gathering state changed: $state');
     };
 
+    peerConnection!.onIceConnectionState = (RTCIceConnectionState state) {
+      if (state == RTCIceConnectionState.RTCIceConnectionStateConnected) {
+        print('Remote user connected');
+        isRemoteUserConnected = true;
+        callStateHandler.sink.add(CallState.talking);
+      } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        print('Remote user disconnected');
+        isRemoteUserConnected = false;
+        callStateHandler.sink.add(CallState.ended);
+      }
+    };
+
+    /// TODO: see below 👇
+    /// These might need further testing before implementing
     peerConnection?.onConnectionState = (RTCPeerConnectionState state) {
-      print('Connection state change: $state');
+        
+      if (state == RTCIceConnectionState.RTCIceConnectionStateConnected) {
+        print('Remote user connected');
+        isRemoteUserConnected = true;
+
+        callStateHandler.sink.add(CallState.talking);
+      } else if (state == RTCIceConnectionState.RTCIceConnectionStateDisconnected ||
+                state == RTCIceConnectionState.RTCIceConnectionStateFailed ||
+                state == RTCIceConnectionState.RTCIceConnectionStateClosed) {
+
+        print('Remote user disconnected or call ended');
+        isRemoteUserConnected = false;
+
+      }
     };
 
     peerConnection?.onSignalingState = (RTCSignalingState state) {

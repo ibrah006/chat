@@ -107,7 +107,7 @@ class CallBubble extends StatelessWidget {
                     ),
                     SizedBox(height: 4), // Slight space between text and call time
                     Text(
-                      DateFormat("hh:mm").format(callDetails.datetime),
+                      DateFormat("hh:mm a").format(callDetails.datetime),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black54,
