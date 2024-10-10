@@ -1,18 +1,18 @@
+import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CallBubble extends StatelessWidget {
-  final CallState callState; // The state of the call (ongoing/incoming, missed, or ended)
-  final String callTime; // The time of the call, e.g., "10:34 AM"
+  final CallDetails callDetails;
 
   CallBubble({
-    required this.callState,
-    required this.callTime,
+    required this.callDetails
   });
 
   // Method to get background color based on the call state
   Color _getBackgroundColor() {
-    switch (callState) {
+    switch (callDetails.state) {
       case CallState.missed:
         return Colors.red.shade50; // Subtle red for missed calls
       case CallState.ended:
@@ -25,7 +25,7 @@ class CallBubble extends StatelessWidget {
 
   // Method to get the icon based on the call state
   IconData _getIcon() {
-    switch (callState) {
+    switch (callDetails.state) {
       case CallState.missed:
         return Icons.phone_missed;
       case CallState.ended:
@@ -38,7 +38,7 @@ class CallBubble extends StatelessWidget {
 
   // Method to get the icon color based on the call state
   Color _getIconColor() {
-    switch (callState) {
+    switch (callDetails.state) {
       case CallState.missed:
         return Colors.red.shade400;
       case CallState.ended:
@@ -51,7 +51,7 @@ class CallBubble extends StatelessWidget {
 
   // Method to get the call status text based on the call state
   String _getCallStatusText() {
-    switch (callState) {
+    switch (callDetails.state) {
       case CallState.missed:
         return "Missed Call";
       case CallState.ended:
@@ -107,7 +107,7 @@ class CallBubble extends StatelessWidget {
                     ),
                     SizedBox(height: 4), // Slight space between text and call time
                     Text(
-                      callTime,
+                      DateFormat("hh:mm").format(callDetails.datetime),
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black54,

@@ -96,69 +96,71 @@ class HomeScreen extends MainWrapperStateful {
 
                   print("friend: ${friend.toMap()}");
 
-                  return ListTile(
-                    leading: Wrap(
-                      children: [
-                        //
-                        Radio<String>(
-                          value: userFcmToken,
-                          groupValue: fcmRadioOption,
-                          onChanged: (value) {
-                            setState(() {
-                              fcmRadioOption = value!;
-                            });
-                          },
-                        ),
-                        // FCM debug option
-                        ... showFcmWarning? [Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
-                            Padding(
-                              padding: EdgeInsets.only(top: 10),
-                              child: TextButton(
-                                style: ButtonStyle(
-                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  minimumSize: WidgetStatePropertyAll(Size.zero),
-                                  padding: WidgetStatePropertyAll(EdgeInsets.zero)
-                                ),
-                                onPressed: ()=> refreshFcmToken(index, friend.email!),
-                                child: Icon(Icons.refresh_rounded,),
+                  return Row(
+                    
+                    children: [
+                      Radio<String>(
+                        value: userFcmToken,
+                        groupValue: fcmRadioOption,
+                        onChanged: (value) {
+                          print("new radio value: $value");
+                          setState(() {
+                            fcmRadioOption = value!;
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: ListTile(
+                          leading: !showFcmWarning? null : Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
+                              Padding(
+                                padding: EdgeInsets.only(top: 10),
+                                child: TextButton(
+                                  style: ButtonStyle(
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    minimumSize: WidgetStatePropertyAll(Size.zero),
+                                    padding: WidgetStatePropertyAll(EdgeInsets.zero)
+                                  ),
+                                  onPressed: ()=> refreshFcmToken(index, friend.email!),
+                                  child: Icon(Icons.refresh_rounded,),
+                                )
                               )
-                            )
-                          ],
-                        )] : []
-                      ],
-                    ),
-                    title: Row(
-                      children: [
-                        Text(friend.displayName?? "N/A display name"),
-                        ... showFcmWarning? [
-                          SizedBox(width: 13),
-                          Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-                          Icon(Icons.warning_rounded, color: Colors.red.shade400)
-                        ] : []
-                      ],
-                    ),
-                    subtitle: Text(friend.email.toString()),
-                    onTap: () {
-                      Get.toNamed("/chat", arguments: friend);
-                    },
-                    trailing: IconButton(
-                      onPressed: () {
-                        // send notifcation about the call
-
-                        Get.toNamed(
-                          "/call",
-                          arguments: CallDetails.fromUserInfo(friend, CALLTYPE).toMap()
-                        );
-
-                        //sendFCMMessage();
+                            ],
+                          ),
+                          title: Row(
+                            children: [
+                              Text(friend.displayName?? "N/A display name"),
+                              ... showFcmWarning? [
+                                SizedBox(width: 13),
+                                Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                                Icon(Icons.warning_rounded, color: Colors.red.shade400)
+                              ] : []
+                            ],
+                          ),
+                          subtitle: Text(friend.email.toString()),
+                          onTap: () {
+                            Get.toNamed("/chat", arguments: friend);
+                          },
+                          trailing: IconButton(
+                            onPressed: () {
+                              // send notifcation about the call
                         
-                        // TODO: send this notification after intiating the call
-                      },
-                      icon: Icon(Icons.video_call_rounded),
-                    ),
+                              Get.toNamed(
+                                "/call",
+                                arguments: CallDetails.fromUserInfo(friend, CALLTYPE).toMap()
+                              );
+                        
+                              //sendFCMMessage();
+                              
+                              // TODO: send this notification after intiating the call
+                            },
+                            icon: Icon(Icons.video_call_rounded),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }
               )

@@ -150,8 +150,8 @@ class CallScreen extends MainWrapperStateful {
                         return ElevatedButton(
                           onPressed: () {
                             switch(index) {
-                              case 0: autoManageCallState();
-                              case 1: autoManageCallState();
+                              // case 0: autoManageCallState();
+                              // case 1: autoManageCallState();
                               case 2: hangUp();
                               // case 3: sendFCMMessage();
                             }
@@ -226,16 +226,18 @@ class CallScreen extends MainWrapperStateful {
 
     // print("currentUserToken: $currentDeviceFCMToken \n toUserToken: $messageToToken");
 
-    final notiTitle = callDetails.displayName!;
-    final notiBody = "Invites you to a ${callDetails.callType == CallType.audio? "Audio" : "Video"} call";
+    final copyOfCallDetailsForCurrentUser = callDetails.copyFrom(Person.fromFirebaseAuth(_auth));
 
-    print("roomId from calldetails: ${callDetails.roomId}");
+    final notiTitle = copyOfCallDetailsForCurrentUser.displayName!;
+    final notiBody = "Invites you to a ${copyOfCallDetailsForCurrentUser.callType == CallType.audio? "Audio" : "Video"} call";
+
+    print("roomId from calldetails: ${copyOfCallDetailsForCurrentUser.roomId}");
 
     await SendPushNotification().sendNotification(
       info: NotificationInfo(
         notiTitle, notiBody, callDetails.fcmToken, type: NotificationType.call
       ),
-      details: callDetails.copyFrom(Person.fromFirebaseAuth(_auth))
+      details: copyOfCallDetailsForCurrentUser
     );
   }
 

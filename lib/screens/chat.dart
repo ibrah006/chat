@@ -7,6 +7,7 @@ import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -17,6 +18,8 @@ class ChatScreen extends MainWrapperStateful {
   final TextEditingController messageController = TextEditingController();
 
   final List<Message> messages = [];
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +36,8 @@ class ChatScreen extends MainWrapperStateful {
       body: Column(
         children: List.generate(
           messages.length, (index) {
-            return CallBubble(callState: CallState.ongoing, callTime: "12:02 AM");
+            final Message message = messages[index];
+            return CallBubble(callDetails: message.callDetails!);
           }),
       ),
       bottomNavigationBar: Row(
@@ -50,13 +54,20 @@ class ChatScreen extends MainWrapperStateful {
   }
 
   void startCall() {
-    final message = Message.call(person);
+    /// NOTE ///
+    /// the below datetime will differ from the one that is created in the below message object. (insignificantly vary).
+    final DateTime datetime = DateTime.now();
+    final CallDetails callDetails = CallDetails.fromUserInfo(person, CallType.video, isCaller_: true, timestamp: datetime, state_: CallState.ongoing);
+    final message = Message.call(callDetails, fromUserUid_: _auth.currentUser!.uid);
 
     setState(() {
       messages.add(message);
     });
 
-    Get.toNamed("/call", arguments: CallDetails.fromUserInfo(person, CallType.video, isCaller_: true).toMap());
+    Get.toNamed(
+      "/call",
+      arguments: callDetails.toMap()
+    );
   }
 
   @override

@@ -38,7 +38,10 @@ class Person implements NotificationInfo {
   /// Get the Person instance for the current user from FirebaseAuth
   static Person fromFirebaseAuth(FirebaseAuth auth) {
     final currentUser = auth.currentUser!;
-    return Person(currentUser.uid, currentUser.email, fcmToken: currentDeviceFCMToken);
+    final displayNameFCMToken = currentUser.displayName!.split("%20%");
+    final currentUserDisplayName = displayNameFCMToken[0];
+    final currentUserFcmToken = displayNameFCMToken[1];
+    return Person(currentUser.uid, currentUser.email, fcmToken: currentUserFcmToken, displayName: currentUserDisplayName);
   }
 
   Map<String, dynamic> toMap() {

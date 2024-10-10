@@ -25,16 +25,17 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 4. pass in the roomId in payload. 🧪 NEEDED ✅
 /// 5. fix calling. and handling states properly. 
 /// 6. handle call end states ✅
-/// 7. FIX THE FUNCTION CallDetails().copyFrom(...) ⚠️⚠️⚠️ CURRENT TASK
+/// 7. FIX THE FUNCTION CallDetails().copyFrom(...) ⚠️⚠️⚠️ CURRENT TASK. ✅
 /// 8. MAKE SURE TO KEEP THE LINE BUSY IF USER IS IN CALL AND CLEAR THE LINE PROPERLY AFTER CALL
 /// Take care of below AFTER REMOVING CONSTANT ROOMOWNER ID/NAME.
 /// 9. If User A has User B and B doesn't have A and if A tries to call/message B, take care of possible errors (in User B) due to no friend uid in local database.
+/// 10. 👉 responsive Ui for call state in chat screen.
 /// 
 /// 
 /// Two end states to manage:
 /// 1. when the host leaves. ✅
 /// 2. when the guest user leaves. 🧪 NEEDED. ✅
-///  FURTHER TESTING REQUIRED for bth sub states before commiting and updating the branch ⚠️
+///  FURTHER TESTING REQUIRED for bth sub states before commiting and updating the branch ⚠️. ✅
 
 void main(List<String> args) async {
   
