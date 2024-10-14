@@ -29,10 +29,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 8. MAKE SURE TO KEEP THE LINE BUSY IF USER IS IN CALL AND CLEAR THE LINE PROPERLY AFTER CALL
 /// Take care of below AFTER REMOVING CONSTANT ROOMOWNER ID/NAME.
 /// 9. If User A has User B and B doesn't have A and if A tries to call/message B, take care of possible errors (in User B) due to no friend uid in local database.
-/// 10. 👉 responsive Ui for call state in chat screen.
+/// 10. 👉 responsive Ui for call state in chat screen. WORKING ON IT ⚠️⚠️⚠️
 /// 
 /// 
-/// Two end states to manage:
+/// Two end states to manage: ✅✅
 /// 1. when the host leaves. ✅
 /// 2. when the guest user leaves. 🧪 NEEDED. ✅
 ///  FURTHER TESTING REQUIRED for bth sub states before commiting and updating the branch ⚠️. ✅
@@ -40,8 +40,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// 👉 MINOR BUG TO FIX BEFORE COMMITING FROM HANDLINGCALLSTATES BRANCH TO MAIN
 /// 1. HOME SCREEN DEV RADIO FOR SENDING SAMPLE FCM MESSAGE. RADIO NOT WORKING. ✅
-/// 2. YET ANOTHER CALL STATE END TO MANAGE. WHEN HOST USER CANCELS CALL. 
-/// 3. WHEN LEFT CALL SHOULD SHOW "CALL ENDED" IN CHAT SCREEN. BASICALLY UPDATE THE CALL MESSAGE.
+/// 2. WHEN LEFT CALL SHOULD SHOW "CALL ENDED" IN CHAT SCREEN. BASICALLY UPDATE THE CALL MESSAGE.
 
 void main(List<String> args) async {
   
@@ -60,7 +59,7 @@ void main(List<String> args) async {
 
   runApp(GetMaterialApp(
     theme: ThemeData(
-      useMaterial3: false
+      useMaterial3: true
     ),
     navigatorKey: navigatorKey,
     // home: HomeScreen(),

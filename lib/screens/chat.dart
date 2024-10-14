@@ -53,7 +53,7 @@ class ChatScreen extends MainWrapperStateful {
     );
   }
 
-  void startCall() {
+  void startCall() async {
     /// NOTE ///
     /// the below datetime will differ from the one that is created in the below message object. (insignificantly vary).
     final DateTime datetime = DateTime.now();
@@ -64,10 +64,13 @@ class ChatScreen extends MainWrapperStateful {
       messages.add(message);
     });
 
-    Get.toNamed(
+    await Get.toNamed(
       "/call",
       arguments: callDetails.toMap()
     );
+
+    message.callDetails!.state = CallState.ended;
+    setState(() {});
   }
 
   @override

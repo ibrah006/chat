@@ -1,1 +1,1 @@
-enum CallState { incoming, ongoing, missed, ended, talking }
+enum CallState { incoming, ongoing, missed, ended, talking, initing }
