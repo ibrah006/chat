@@ -65,7 +65,7 @@ class CallDetails extends Person implements NotificationInfo {
 
   static CallDetails fromMap(Map map) {
     final callTypes = CallType.values.map((e)=> e.name).toList();
-    final callStates = CallState.values.map((e)=> e.name).toList();;
+    final callStates = CallState.values.map((e)=> e.name).toList();
 
     final instance = CallDetails(
       map["uid"],
@@ -74,7 +74,7 @@ class CallDetails extends Person implements NotificationInfo {
       callType: CallType.values[callTypes.indexOf(map["callType"])],
       state: CallState.values[callStates.indexOf(map["state"])]?? CallState.ended,
       displayName: map["displayName"],
-      timestamp: map["datetime"]
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map["datetime"] is String? int.parse(map["datetime"]) : map["datetime"])
     );
 
     try {

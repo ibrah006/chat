@@ -37,7 +37,7 @@ class ChatScreen extends MainWrapperStateful {
         children: List.generate(
           messages.length, (index) {
             final Message message = messages[index];
-            return CallBubble(callDetails: message.callDetails!);
+            return CallBubble(callDetails: message.details);
           }),
       ),
       bottomNavigationBar: Row(
@@ -66,10 +66,10 @@ class ChatScreen extends MainWrapperStateful {
 
     await Get.toNamed(
       "/call",
-      arguments: callDetails.toMap()
+      arguments: message.toMap()
     );
 
-    message.callDetails!.state = CallState.ended;
+    message.details.state = CallState.ended;
     setState(() {});
   }
 

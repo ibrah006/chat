@@ -1,14 +1,13 @@
 
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_type.dart';
-import 'package:chat/users/person.dart';
 import 'package:uuid/uuid.dart';
 
-class   Message {
+class Message {
   Message(
     this.id,
     this.text,
-    this.person, {
+    this.details, {
     final DateTime? timestamp,
     this.notificationType = NotificationType.message,
     required this.fromUserUid
@@ -16,17 +15,20 @@ class   Message {
     datetime = timestamp?? DateTime.now();
   }
 
+  @deprecated
   bool get _isMessage => notificationType == NotificationType.message;
 
   final String text, id;
   /// this is auto unless specified
   late final DateTime datetime;
-  final Person person;
+  // Can be of the instance CallDetails or Person itself
+  final CallDetails details;
 
   late final NotificationType notificationType;
 
   final String fromUserUid;
 
+  @deprecated
   CallDetails? callDetails;
 
   /// change the parameter if video call
@@ -36,8 +38,30 @@ class   Message {
     final messageId = Uuid().v1();
     final message = Message(messageId, "Video call", callDetails_, fromUserUid: fromUserUid_);
 
-    message.callDetails = callDetails_;
-
     return message;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      ...details.toMap(),
+      "id": id,
+      "message": text,
+      "datetime": datetime.millisecondsSinceEpoch.toString(),
+      "notificationType": notificationType.name,
+      "fromUser": fromUserUid
+    };
+  }
+
+  static Message fromMap(Map<String, dynamic> map) {
+    final notificationTypes = NotificationType.values.map((e)=> e.name).toList();
+
+    return Message(
+      map["id"]?? map["messageId"],
+      map["message"]?? map["text"],
+      CallDetails.fromMap(map),
+      timestamp: DateTime.fromMillisecondsSinceEpoch(map["datetime"] is String? int.parse(map["datetime"]) : map["datetime"]),
+      notificationType: NotificationType.values[notificationTypes.indexOf(map["notificationType"])],
+      fromUserUid: map["fromUser"]?? map["fromUserUid"]
+    );
   }
 }

@@ -16,7 +16,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat/components/custom_radios.dart';
-import 'package:get/get_connect/sockets/src/socket_notifier.dart';
+import 'package:chat/services/messages/message.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -32,6 +32,8 @@ class HomeScreen extends MainWrapperStateful {
 
   final Stopwatch sinceStart = Stopwatch();
 
+  final List<Message> messages = [];
+
   @override
   void initState() {
     super.initState();
@@ -43,11 +45,14 @@ class HomeScreen extends MainWrapperStateful {
       });
     });
 
-    FirebaseMessaging.onMessage.listen((message) {
-      final notification = message.notification;
+    FirebaseMessaging.onMessage.listen((remoteMessage) {
+      final notification = remoteMessage.notification;
 
-      // TOOD: check this - i think when notification somehow ends up begin null then no more notifications will be shown as we've retruned from the function
-      if (notification==null) return;
+      if (notification!=null) {
+        final messagePayload = Map.of(remoteMessage.data);
+        final newMessage = Message.fromMap(messagePayload);
+        messages.add(newMessage);
+      }
       
     });
 
@@ -176,12 +181,13 @@ class HomeScreen extends MainWrapperStateful {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  SendPushNotification().sendNotification(
-                    info: NotificationInfo(
-                      "Sample notification title", "sample body", fcmRadioOption, type: NotificationType.call
-                    ),
-                    details: Person("sample", "sample@mail.com", fcmToken: fcmRadioOption)
-                  );
+                  throw UnimplementedError("This method's functionality has been turned off temporarily");
+                  // SendPushNotification().sendNotification(
+                  //   info: NotificationInfo(
+                  //     "Sample notification title", "sample body", fcmRadioOption, type: NotificationType.call
+                  //   ),
+                  //   details: Person("sample", "sample@mail.com", fcmToken: fcmRadioOption)
+                  // );
                 },
                 style: const ButtonStyle(
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,

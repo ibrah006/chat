@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:chat/constants/notifications_c.dart';
 import 'package:chat/constants/serviceAccCred.dart';
+import 'package:chat/services/messages/message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/users/person.dart';
 import 'package:http/http.dart' as http;
@@ -29,13 +30,13 @@ class SendPushNotification {
   }
 
   // Send notification using the FCM HTTP v1 API
-  Future<void> sendNotification({required NotificationInfo info, required Person details}) async {
+  Future<void> sendNotification({required NotificationInfo info, required Message message}) async {
     String accessToken = await _getAccessToken(info.fcmToken!);
 
     var url = Uri.parse('https://fcm.googleapis.com/v1/projects/$projectId/messages:send');
 
     Map<String, dynamic> body = NotificationConstants.getNotificationPayload(
-      info, data: details.toMap()
+      info, data: message.toMap()
     );
 
     var headers = {

@@ -9,6 +9,7 @@ import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_options.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/call/signalling.dart';
+import 'package:chat/services/messages/message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
@@ -41,7 +42,7 @@ class CallScreen extends MainWrapperStateful {
 
   // StreamSubscription? callListener;
 
-  late final CallDetails callDetails;
+  late final Message callMessage;
 
   late final bool isCaller;
 
@@ -65,19 +66,19 @@ class CallScreen extends MainWrapperStateful {
   void initState() {
 
     // get call details passed in as arguments
-    callDetails = CallDetails.fromMap(Get.arguments);
+    callMessage = Message.fromMap(Get.arguments);
 
     // below line decides if the user is caller or callee
-    isCaller = callDetails.roomId == null;
+    isCaller = callMessage.details.roomId == null;
 
     // TODO: there might be error here if this build is called before the actual build
     signaling.callStateHandler.sink.add(isCaller? CallState.ongoing : CallState.incoming);
 
-    roomOwner = (isCaller? callDetails.uid : _auth.currentUser!.uid)!;
+    roomOwner = (isCaller? callMessage.details.uid : _auth.currentUser!.uid)!;
 
     // if callee then check if the room stil exists then proceed with the call init
     if (!isCaller) {
-      FirebaseFirestore.instance.collection(roomOwner).doc(callDetails.roomId).get().then((roomData) {
+      FirebaseFirestore.instance.collection(roomOwner).doc(callMessage.details.roomId).get().then((roomData) {
         if (roomData.exists) {
           init();
         } else {
@@ -94,7 +95,7 @@ class CallScreen extends MainWrapperStateful {
 
   void init() {
 
-    print("call detials: ${callDetails.toString()}");
+    print("call detials: ${callMessage.details.toString()}");
 
     signaling.onAddRemoteStream = ((stream) {
       _remoteRenderer.srcObject = stream;
@@ -244,7 +245,7 @@ class CallScreen extends MainWrapperStateful {
                               children: [
                                 const SizedBox(height: 16.0),
                                 Text(
-                                  callDetails.displayName!,
+                                  callMessage.details.displayName!,
                                   style: TextStyle(
                                     fontSize: 24.0,
                                     fontWeight: FontWeight.w600,
@@ -383,22 +384,22 @@ class CallScreen extends MainWrapperStateful {
 
   Future<void> sendFCMMessage() async {
 
-    callDetails.initializeRoomId(roomId!);
+    callMessage.details.initializeRoomId(roomId!);
 
     // print("currentUserToken: $currentDeviceFCMToken \n toUserToken: $messageToToken");
 
-    final copyOfCallDetailsForCurrentUser = callDetails.copyFrom(Person.fromFirebaseAuth(_auth));
+    final copyOfCallDetailsForCurrentUser = callMessage.details.copyFrom(Person.fromFirebaseAuth(_auth));
 
     final notiTitle = copyOfCallDetailsForCurrentUser.displayName!;
     final notiBody = "Invites you to a ${copyOfCallDetailsForCurrentUser.callType == CallType.audio? "Audio" : "Video"} call";
 
-    print("roomId from calldetails: ${copyOfCallDetailsForCurrentUser.roomId}");
+    print("callMessage: ${callMessage.toMap().toString()}");
 
     await SendPushNotification().sendNotification(
       info: NotificationInfo(
-        notiTitle, notiBody, callDetails.fcmToken, type: NotificationType.call
+        notiTitle, notiBody, callMessage.details.fcmToken, type: NotificationType.call
       ),
-      details: copyOfCallDetailsForCurrentUser
+      message: callMessage
     );
   }
 
@@ -420,7 +421,7 @@ class CallScreen extends MainWrapperStateful {
       signaling.callStateHandler.sink.add(CallState.talking);
 
       await signaling.joinRoom(
-        callDetails.roomId!,
+        callMessage.details.roomId!,
         _remoteRenderer,
         currentuser: roomOwner
       );
