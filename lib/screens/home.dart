@@ -6,8 +6,7 @@ import 'package:chat/databases/local_database.dart';
 import 'package:chat/databases/tables.dart';
 import 'package:chat/main.dart';
 import 'package:chat/services/call/call_details.dart';
-import 'package:chat/services/notification/notification_type.dart';
-import 'package:chat/services/notification/send_notification.dart';
+import 'package:chat/services/notification/notification_service.dart' show handleMessage;
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
@@ -45,15 +44,11 @@ class HomeScreen extends MainWrapperStateful {
       });
     });
 
-    FirebaseMessaging.onMessage.listen((remoteMessage) {
-      final notification = remoteMessage.notification;
-
-      if (notification!=null) {
-        final messagePayload = Map.of(remoteMessage.data);
-        final newMessage = Message.fromMap(messagePayload);
-        messages.add(newMessage);
+    // getting the remote message (notification) user clicked on to get to the app (if any)
+    FirebaseMessaging.instance.getInitialMessage().then((remoteMessage) {
+      if (remoteMessage!=null) {
+        handleMessage(remoteMessage);
       }
-      
     });
 
     sinceStart.start();
@@ -104,13 +99,13 @@ class HomeScreen extends MainWrapperStateful {
                 friends.length,
                 (index) {
                   
-
+    
                   final Person friend = friends[index];
                   final String userFcmToken = friend.fcmToken;
                   final bool showFcmWarning = userFcmToken.isEmpty;
-
+    
                   print("friend: ${friend.toMap()}");
-
+    
                   return ListTile(
                     leading: !showFcmWarning? null : Stack(
                       alignment: Alignment.topCenter,
@@ -164,7 +159,7 @@ class HomeScreen extends MainWrapperStateful {
               )
             )
           ),
-
+    
           ListTile(
             leading: Checkbox(
               value: debug.showTimeSinceStart,

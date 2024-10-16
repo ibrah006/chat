@@ -8,9 +8,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 
+@pragma("vm:entry-point")
 Future<void> handleBackgroundMessage(RemoteMessage? message) async {
   if (message!=null) {
     print("new message: ${message.from}, ${message.data}, ${message.messageId}");
+    handleMessage(message);
   }
 }
 
@@ -72,7 +74,7 @@ class NotificationService {
     );
 
     _firebaseMessaging.getInitialMessage().then(handleBackgroundMessage);
-
+  
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);

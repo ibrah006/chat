@@ -6,10 +6,12 @@ import 'package:chat/screens/login.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
+import 'package:chat/services/providers/messages_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 
 // const ROOMOWNER = 'mohammed';
 const CALLTYPE = CallType.video;
@@ -29,7 +31,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// 8. MAKE SURE TO KEEP THE LINE BUSY IF USER IS IN CALL AND CLEAR THE LINE PROPERLY AFTER CALL
 /// Take care of below AFTER REMOVING CONSTANT ROOMOWNER ID/NAME.
 /// 9. If User A has User B and B doesn't have A and if A tries to call/message B, take care of possible errors (in User B) due to no friend uid in local database.
-/// 10. 👉 responsive Ui for call state in chat screen. WORKING ON IT ⚠️⚠️⚠️
+/// 10. 👉 responsive Ui for call state in chat screen. WORKING ON IT ⚠️⚠️⚠️. fairly responsive. ✅
 /// 
 /// 
 /// Two end states to manage: ✅✅
@@ -40,7 +42,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// 👉 MINOR BUG TO FIX BEFORE COMMITING FROM HANDLINGCALLSTATES BRANCH TO MAIN
 /// 1. HOME SCREEN DEV RADIO FOR SENDING SAMPLE FCM MESSAGE. RADIO NOT WORKING. ✅
-/// 2. WHEN LEFT CALL SHOULD SHOW "CALL ENDED" IN CHAT SCREEN. BASICALLY UPDATE THE CALL MESSAGE.
+/// 2. WHEN LEFT CALL SHOULD SHOW "CALL ENDED" IN CHAT SCREEN. BASICALLY UPDATE THE CALL MESSAGE. ✅
 
 void main(List<String> args) async {
   
