@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:chat/constants/notifications_c.dart';
 import 'package:chat/constants/serviceAccCred.dart';
 import 'package:chat/services/messages/message.dart';
+import 'package:chat/services/notification/notification_service.dart';
 import 'package:chat/services/notification/notification_type.dart';
-import 'package:chat/users/person.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 
 class SendPushNotification {
@@ -68,3 +70,65 @@ class NotificationInfo {
   final NotificationType type;
 }
 
+
+class InAppNotification {
+
+  static show(Message message) {
+    
+    final isCallNotification = message.details.roomId != null;
+
+    showSimpleNotification(
+      Text(
+        message.details.displayName?? message.details.email!,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.black
+        )),
+      subtitle: Text(
+        isCallNotification? "Incoming Call" : message.text, style: const TextStyle(
+          fontSize: 14,
+          color: Colors.grey
+        )),
+      background: Colors.white,
+      autoDismiss: false,
+      leading: const CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.blue,
+        child: Icon(
+          Icons.phone,
+          color: Colors.white,
+        ),
+      ),
+      trailing: Builder(
+        builder: (context) {
+          return isCallNotification? Wrap(
+            children: [
+              // Decline Button
+              IconButton(
+                icon: Icon(Icons.call_end, color: Colors.red),
+                onPressed: () {
+                  OverlaySupportEntry.of(context)?.dismiss();
+                },
+              ),
+              SizedBox(width: 10),
+              // Answer Button
+              IconButton(
+                icon: Icon(Icons.call, color: Colors.green),
+                color: Colors.green,
+                onPressed: () {
+                  NotificationService.onAnswerCall(message.toMap());
+                  OverlaySupportEntry.of(context)?.dismiss();
+                },
+              ),
+            ],
+          ) : IconButton(
+            icon: Icon(Icons.reply_rounded, color: Colors.grey.shade500),
+            onPressed: () {},
+          );
+        },
+      ),
+    );
+  }
+
+}

@@ -10,6 +10,7 @@ import 'package:chat/services/providers/messages_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
@@ -59,19 +60,21 @@ void main(List<String> args) async {
   //TODO: remove this when shifitng to call screen
   await Permission.camera.request();
 
-  runApp(GetMaterialApp(
-    theme: ThemeData(
-      useMaterial3: true
+  runApp(OverlaySupport.global(
+    child: GetMaterialApp(
+      theme: ThemeData(
+        useMaterial3: true
+      ),
+      navigatorKey: navigatorKey,
+      // home: HomeScreen(),
+      initialRoute: '/login',
+      getPages: [
+        GetPage(name: "/", page: ()=> HomeScreen()),
+        GetPage(name: "/login", page: ()=> LoginScreen(fcmToken)),
+        GetPage(name: "/call", page: ()=> CallScreen()),
+        GetPage(name: "/chat", page: ()=> ChatScreen())
+      ],
     ),
-    navigatorKey: navigatorKey,
-    // home: HomeScreen(),
-    initialRoute: '/login',
-    getPages: [
-      GetPage(name: "/", page: ()=> HomeScreen()),
-      GetPage(name: "/login", page: ()=> LoginScreen(fcmToken)),
-      GetPage(name: "/call", page: ()=> CallScreen()),
-      GetPage(name: "/chat", page: ()=> ChatScreen())
-    ],
   ));
 }
 

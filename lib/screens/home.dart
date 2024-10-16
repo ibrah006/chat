@@ -7,6 +7,7 @@ import 'package:chat/databases/tables.dart';
 import 'package:chat/main.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_service.dart' show handleMessage;
+import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat/components/custom_radios.dart';
 import 'package:chat/services/messages/message.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -47,8 +49,14 @@ class HomeScreen extends MainWrapperStateful {
     // getting the remote message (notification) user clicked on to get to the app (if any)
     FirebaseMessaging.instance.getInitialMessage().then((remoteMessage) {
       if (remoteMessage!=null) {
+        print("invoked home screen initial message!, remoteMessage: ${remoteMessage.data}");
         handleMessage(remoteMessage);
       }
+    });
+
+    FirebaseMessaging.onMessage.listen((remoteMessage) {
+      print("remote notification received while inside home screen: ${remoteMessage.data}");
+      InAppNotification.show(Message.fromMap(Map.of(remoteMessage.data)));
     });
 
     sinceStart.start();
@@ -159,7 +167,7 @@ class HomeScreen extends MainWrapperStateful {
               )
             )
           ),
-    
+
           ListTile(
             leading: Checkbox(
               value: debug.showTimeSinceStart,

@@ -5,13 +5,11 @@ import 'package:chat/components/bubbles/callBubble.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
-import 'package:chat/services/providers/messages_state.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 class ChatScreen extends MainWrapperStateful {
 

@@ -19,19 +19,23 @@ Future<void> handleBackgroundMessage(RemoteMessage? message) async {
 void handleMessage(RemoteMessage message) {
   // notification pressed
 
-  print("noti pressed: ${message.data}");
-
-  //TODO: check to see if it's a call notification before executing the below
-
-  final payload = Map.of(message.data);
-  payload["isCaller"] = false;
-
-  print("payload received: $payload");
-
-  Get.toNamed("/call", arguments: payload);
+  NotificationService.onAnswerCall(message.data);
 }
 
 class NotificationService {
+
+  static onAnswerCall(Map<String, dynamic> messagePayload) {
+    print("noti pressed: ${messagePayload}");
+
+    //TODO: check to see if it's a call notification before executing the below
+
+    final payload = Map<String, dynamic>.of(messagePayload);
+    payload["isCaller"] = false;
+
+    print("payload received: $payload");
+
+    Get.toNamed("/call", arguments: payload);
+  }
 
   static final _firebaseMessaging = FirebaseMessaging.instance;
 
