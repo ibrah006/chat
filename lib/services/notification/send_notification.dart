@@ -78,9 +78,6 @@ class InAppNotification {
 
   static _toChatScreen(context, Message message) async {
 
-    // adds friend to the table if doesn't already exist
-    await UsersManager.addNewFriend(message.details.email!, userData: message.details);
-
     // check to see if user is already in chatscreen
     if (Get.currentRoute == "/chat") {
       final Person currentViewingChat = Get.arguments;
@@ -91,6 +88,9 @@ class InAppNotification {
     } else {
       Get.toNamed("/chat", arguments: message.details);
     }
+
+    // adds friend to the table if doesn't already exist
+    await UsersManager.addNewFriend(message.details.email!, userData: message.details);
 
     OverlaySupportEntry.of(context)?.dismiss();
   }
