@@ -1,6 +1,7 @@
 
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_type.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
 
 class Message {
@@ -27,6 +28,8 @@ class Message {
   late final NotificationType notificationType;
 
   final String fromUserUid;
+
+  bool get isSender => fromUserUid == FirebaseAuth.instance.currentUser!.uid;
 
   @deprecated
   CallDetails? callDetails;

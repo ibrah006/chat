@@ -2,6 +2,7 @@
 
 
 import 'package:chat/components/bubbles/callBubble.dart';
+import 'package:chat/components/bubbles/messageBubble.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
@@ -40,7 +41,9 @@ class ChatScreen extends MainWrapperStateful {
         children: List.generate(
           messages.length, (index) {
             final Message message = messages[index];
-            return CallBubble(callDetails: message.details);
+
+            print("is message a call: ${message.notificationType}");
+            return message.notificationType == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
           }),
       ),
       bottomNavigationBar: Row(
@@ -68,6 +71,10 @@ class ChatScreen extends MainWrapperStateful {
       ),
       message: message
     );
+
+    setState(() {
+      messages.add(message);
+    });
   }
 
   void startCall() async {
