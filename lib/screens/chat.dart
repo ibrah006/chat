@@ -42,8 +42,8 @@ class ChatScreen extends MainWrapperStateful {
           messages.length, (index) {
             final Message message = messages[index];
 
-            print("is message a call: ${message.notificationType}");
-            return message.notificationType == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
+            print("is message a call: ${message.details.type}");
+            return message.details.type == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
           }),
       ),
       bottomNavigationBar: Row(

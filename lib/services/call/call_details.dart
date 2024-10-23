@@ -3,7 +3,6 @@ import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
-import 'package:flutter/material.dart';
 
 enum CallType {
   video, audio
@@ -100,10 +99,10 @@ class CallDetails extends Person implements NotificationInfo {
   @override
   // TODO: implement type
   NotificationType get type {
-    if (callType == CallType.video) {
-      return NotificationType.videoCall;
-    } else {
-      return NotificationType.call;
+    switch(callType) {
+      case CallType.video: return NotificationType.videoCall;
+      case CallType.audio: return NotificationType.call;
+      default: return NotificationType.message;
     }
   }
   
