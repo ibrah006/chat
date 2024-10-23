@@ -6,7 +6,12 @@ import 'package:get/get.dart';
 
 class UsersManager {
 
-  static Future<Person?> addNewFriend(String email) async {
+  static Future<Person?> addNewFriend(String email, {Person? userData}) async {
+
+    if (userData!=null) {
+      
+    }
+
     if (email.isEmail) {
       final userInfo = await AdminUserInfo.getUserInfo(email);
 

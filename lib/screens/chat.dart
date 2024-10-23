@@ -5,11 +5,14 @@ import 'package:chat/components/bubbles/callBubble.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
+import 'package:chat/services/notification/notification_type.dart';
+import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatScreen extends MainWrapperStateful {
 
@@ -43,13 +46,27 @@ class ChatScreen extends MainWrapperStateful {
       bottomNavigationBar: Row(
         children: [
           Expanded(child: TextField(controller: messageController, decoration: InputDecoration(hintText: " Type your message..."),)),
-          const ElevatedButton(
-            // onPressed: sendFCMMessage,
-            onPressed: null,
-            child: Text("Send") 
+          ElevatedButton(
+            onPressed: sendFCMMessage,
+            child: const Text("Send") 
           )
         ],
       ),
+    );
+  }
+
+  Future<void> sendFCMMessage() async {
+
+    final Message message = Message(Uuid().v1(), messageController.text, CallDetails.fromUserInfo(person, null), fromUserUid: _auth.currentUser!.uid);
+
+    final notiTitle = _auth.currentUser!.displayName!;
+    final notiBody = message.text;
+
+    await SendPushNotification().sendNotification(
+      info: NotificationInfo(
+        notiTitle, notiBody, message.details.fcmToken, type: NotificationType.message
+      ),
+      message: message
     );
   }
 

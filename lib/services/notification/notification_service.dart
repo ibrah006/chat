@@ -4,9 +4,11 @@ import 'dart:convert';
 
 import 'package:chat/main.dart';
 import 'package:chat/services/notification/send_notification.dart';
+import 'package:chat/users/users_manager.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:chat/services/messages/message.dart' as message;
 
 @pragma("vm:entry-point")
 Future<void> handleBackgroundMessage(RemoteMessage? message) async {
@@ -16,15 +18,20 @@ Future<void> handleBackgroundMessage(RemoteMessage? message) async {
   }
 }
 
-void handleMessage(RemoteMessage message) {
+void handleMessage(RemoteMessage remoteMessage) {
   // notification pressed
 
-  NotificationService.onAnswerCall(message.data);
+  final msg = message.Message.fromMap(remoteMessage.data);
+  if (msg.details.roomId != null) {
+    NotificationService.onAnswerCall(remoteMessage.data);
+  } else {
+    // TODO: handle on press notification for non-calls
+  }
 }
 
 class NotificationService {
 
-  static onAnswerCall(Map<String, dynamic> messagePayload) {
+  static onAnswerCall(Map<String, dynamic> messagePayload) async {
     print("noti pressed: ${messagePayload}");
 
     //TODO: check to see if it's a call notification before executing the below
@@ -33,6 +40,11 @@ class NotificationService {
     payload["isCaller"] = false;
 
     print("payload received: $payload");
+
+    final message.Message messageRecevied = message.Message.fromMap(messagePayload);
+
+    // adds this friend to chats table if they doesn't already exsist
+    await UsersManager.addNewFriend(messageRecevied.details.email!, userData: messageRecevied.details);
 
     Get.toNamed("/call", arguments: payload);
   }

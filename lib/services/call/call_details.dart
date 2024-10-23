@@ -14,15 +14,17 @@ class CallDetails extends Person implements NotificationInfo {
     datetime = timestamp?? DateTime.now();
   }
 
-  final CallType callType;
+  // will be null for a text message
+  final CallType? callType;
 
   String? roomId;
 
-  CallState state;
+  // will be null for a text message
+  CallState? state;
 
   late DateTime datetime;
 
-  static CallDetails fromUserInfo(Person userInfo, CallType callType_, {bool? isCaller_, DateTime? timestamp, CallState? state_}) {
+  static CallDetails fromUserInfo(Person userInfo, CallType? callType_, {bool? isCaller_, DateTime? timestamp, CallState? state_}) {
     return CallDetails(
       userInfo.uid!,
       userInfo.email!,
@@ -43,10 +45,10 @@ class CallDetails extends Person implements NotificationInfo {
       "uid": uid,
       "email": email,
       "fcmToken": fcmToken,
-      "callType": callType.name,
+      "callType": callType?.name,
       "displayName": displayName,
       "roomId": roomId,
-      "state": state.name
+      "state": state?.name
     };
   }
 
@@ -71,8 +73,8 @@ class CallDetails extends Person implements NotificationInfo {
       map["uid"],
       map["email"],
       map["fcmToken"]?? map["token"],
-      callType: CallType.values[callTypes.indexOf(map["callType"])],
-      state: CallState.values[callStates.indexOf(map["state"])]?? CallState.ended,
+      callType: map["callType"]==null? null :  CallType.values[callTypes.indexOf(map["callType"])],
+      state: map["state"] == null? null : (CallState.values[callStates.indexOf(map["state"])]?? CallState.ended),
       displayName: map["displayName"],
       timestamp: DateTime.fromMillisecondsSinceEpoch(map["datetime"] is String? int.parse(map["datetime"]) : map["datetime"])
     );
@@ -90,7 +92,7 @@ class CallDetails extends Person implements NotificationInfo {
   }
   
   @override
-  String get body => "Invites you to a ${callType.name}";
+  String get body => "Invites you to a ${callType?.name}";
   
   @override
   String get title => displayName?? email!;

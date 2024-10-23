@@ -115,7 +115,7 @@ class HomeScreen extends MainWrapperStateful {
                   print("friend: ${friend.toMap()}");
     
                   return ListTile(
-                    leading: !showFcmWarning? null : Stack(
+                    leading: !true? null : Stack(
                       alignment: Alignment.topCenter,
                       children: [
                         Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
