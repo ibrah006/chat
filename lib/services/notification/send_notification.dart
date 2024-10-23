@@ -78,19 +78,19 @@ class InAppNotification {
 
   static _toChatScreen(context, Message message) async {
 
-    // adds friend to the table if doesn't already exist
-    await UsersManager.addNewFriend(message.details.email!, userData: message.details);
-
     // check to see if user is already in chatscreen
     if (Get.currentRoute == "/chat") {
       final Person currentViewingChat = Get.arguments;
       // if the notification they clicked on is from a different friend than the currently viewing one, it will pop the screen and push chat screen again with the arguments corssponding to the notification's sender
-      if (currentViewingChat.uid != message.details.uid) {
-        Get.offNamed("/chat", arguments: message.details);
+      if (currentViewingChat.uid == message.details.uid) {
+        return;
       }
-    } else {
-      Get.toNamed("/chat", arguments: message.details);
-    }
+    } 
+
+    Get.toNamed("/chat", arguments: message.details);
+
+    // adds friend to the table if doesn't already exist
+    await UsersManager.addNewFriend(message.details.email!, userData: message.details);
 
     OverlaySupportEntry.of(context)?.dismiss();
   }
