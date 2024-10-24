@@ -6,6 +6,7 @@ import 'package:chat/screens/login.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
+import 'package:chat/services/provider/messages_manager.dart';
 import 'package:chat/services/providers/messages_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,9 @@ void main(List<String> args) async {
 
   //TODO: remove this when shifitng to call screen
   await Permission.camera.request();
+
+  // Inject the MessagesManager (provider)
+  Get.put(MessagesManager());
 
   runApp(OverlaySupport.global(
     child: GetMaterialApp(

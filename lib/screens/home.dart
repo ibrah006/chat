@@ -1,4 +1,5 @@
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
 import 'package:chat/constants/dialogs.dart';
@@ -8,6 +9,7 @@ import 'package:chat/main.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_service.dart' show handleMessage;
 import 'package:chat/services/notification/send_notification.dart';
+import 'package:chat/services/provider/state_controller/messages_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
@@ -17,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:chat/components/custom_radios.dart';
 import 'package:chat/services/messages/message.dart';
-import 'package:overlay_support/overlay_support.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -34,6 +35,15 @@ class HomeScreen extends MainWrapperStateful {
   final Stopwatch sinceStart = Stopwatch();
 
   final List<Message> messages = [];
+
+  // for playing a small sound on notification while inside '/chat' screen
+  final AudioPlayer audioPlayer = AudioPlayer();
+  static const audioPath = "bubble.mp3";
+
+  // when a message comes in for the current user, it is stored inside this until read in the chat_screen
+  final List<Message> messagesSource = [];
+
+  final MessagesController messagesController = Get.put(MessagesController());
 
   @override
   void initState() {
@@ -56,7 +66,18 @@ class HomeScreen extends MainWrapperStateful {
 
     FirebaseMessaging.onMessage.listen((remoteMessage) {
       print("remote notification received while inside home screen: ${remoteMessage.data}");
-      InAppNotification.show(Message.fromMap(Map.of(remoteMessage.data)));
+
+      final formattedRemoteMessage = Message.fromMap(Map.of(remoteMessage.data));
+
+      messagesSource.add(formattedRemoteMessage);
+      if (Get.currentRoute != "/chat") {
+        InAppNotification.show(formattedRemoteMessage );
+      } else {
+        // play sound
+        audioPlayer.play(AssetSource(audioPath));
+        
+      }
+      messagesController.data.add(formattedRemoteMessage);
     });
 
     sinceStart.start();
@@ -135,7 +156,7 @@ class HomeScreen extends MainWrapperStateful {
                     ),
                     title: Row(
                       children: [
-                        Text(friend.displayName?? "N/A display name"),
+                        Text('${friend.displayName?? "N/A display name"}${auth.currentUser!.uid == friend.uid? " (You)" : ""}'),
                         ... showFcmWarning? [
                           SizedBox(width: 13),
                           Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),

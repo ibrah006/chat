@@ -8,6 +8,7 @@ import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
+import 'package:chat/services/provider/state_controller/messages_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,12 +22,17 @@ class ChatScreen extends MainWrapperStateful {
 
   final TextEditingController messageController = TextEditingController();
 
-  final List<Message> messages = [];
+  // @deprecated
+  // final List<Message> messages = [];
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  //
+  final MessagesController messagesController = Get.put(MessagesController());
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text(person.displayName!),
@@ -37,14 +43,29 @@ class ChatScreen extends MainWrapperStateful {
           )
         ]
       ),
-      body: Column(
-        children: List.generate(
-          messages.length, (index) {
-            final Message message = messages[index];
+      body: Obx(
+        () {
 
-            print("is message a call: ${message.details.type}");
-            return message.details.type == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
-          }),
+          final messages = messagesController.data;
+
+          return Column(
+            children: [
+              ...List.generate(
+                messages.length, (index) {
+                  final Message message = messages[index];
+          
+                  print("is message a call: ${message.details.type}");
+
+                  // TODO: fix this. this may be a tempoorary solution only.
+                  if (message.details.uid != person.uid) {
+                    return SizedBox();
+                  }
+
+                  return message.details.type == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
+                }),
+            ]
+          );
+        }
       ),
       bottomNavigationBar: Row(
         children: [
@@ -73,7 +94,7 @@ class ChatScreen extends MainWrapperStateful {
     );
 
     setState(() {
-      messages.add(message);
+      messagesController.data.add(message);
     });
   }
 
@@ -85,7 +106,7 @@ class ChatScreen extends MainWrapperStateful {
     final message = Message.call(callDetails, fromUserUid_: _auth.currentUser!.uid);
 
     setState(() {
-      messages.add(message);
+      messagesController.data.add(message);
     });
 
     await Get.toNamed(
