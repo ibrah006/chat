@@ -14,7 +14,8 @@ class LoginScreen extends MainWrapperStateful {
   static const Iterable _quickLogins = [
     "ibrah@chatly.com",
     "dell@chatly.com",
-    "flutteremu@chatly.com"
+    "flutteremu@chatly.com",
+    "samsung@chatly.com"
   ];
 
 
@@ -91,60 +92,71 @@ class LoginScreen extends MainWrapperStateful {
     }
   }
 
+  late final Size screenSize;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: showDisplayNameInput? Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Display name"),
-          TextField(
-            controller: displayNameController,
-          ),
-          SizedBox(height: 17.5),
-          ElevatedButton(
-            onPressed: updateDisplayName,
-            child: Text("Continue")
-          )
-        ],
-      )
-       : Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Welcome!", style: textTheme.headlineMedium!.copyWith(color: Colors.black87)),
-          SizedBox(height: 40),
-          TextField(
-            controller: emailController,
-          ),
-          TextField(
-            controller: passController,
-            obscureText: true,
-          ),
-          SizedBox(height: 17.5),
-          ElevatedButton(
-            onPressed: login,
-            child: Text("Login")
-          ),
-          SizedBox(height: 50),
 
-          ...List.generate(
-            _quickLogins.length,
-            (index) {
-              return ListTile(
-                leading: Text(_quickLogins.elementAt(index)),
-                trailing: Radio<String>(
-                  value: _quickLogins.elementAt(index),
-                  groupValue: selectedQuickLogin,
-                  onChanged:(value) {
-                    setState(() {
-                      selectedQuickLogin = value!;
-                    });
-                    updateFields();
-                  },
-                ),
-              );
-            }
+    try {
+      screenSize = MediaQuery.of(context).size;
+    } catch(e) {}
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          showDisplayNameInput? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Display name"),
+              TextField(
+                controller: displayNameController,
+              ),
+              SizedBox(height: 17.5),
+              ElevatedButton(
+                onPressed: updateDisplayName,
+                child: Text("Continue")
+              )
+            ],
           )
+           : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Welcome!", style: textTheme.headlineMedium!.copyWith(color: Colors.black87)),
+              SizedBox(height: 40),
+              TextField(
+                controller: emailController,
+              ),
+              TextField(
+                controller: passController,
+                obscureText: true,
+              ),
+              SizedBox(height: 17.5),
+              ElevatedButton(
+                onPressed: login,
+                child: Text("Login")
+              ),
+              SizedBox(height: 50),
+          
+              ...List.generate(
+                _quickLogins.length,
+                (index) {
+                  return ListTile(
+                    leading: Text(_quickLogins.elementAt(index)),
+                    trailing: Radio<String>(
+                      value: _quickLogins.elementAt(index),
+                      groupValue: selectedQuickLogin,
+                      onChanged:(value) {
+                        setState(() {
+                          selectedQuickLogin = value!;
+                        });
+                        updateFields();
+                      },
+                    ),
+                  );
+                }
+              )
+            ],
+          ),
         ],
       ),
       
@@ -154,7 +166,7 @@ class LoginScreen extends MainWrapperStateful {
   @override
   void initState() {
     super.initState();
-
+    
     checkAuthStatus();
   }
 }

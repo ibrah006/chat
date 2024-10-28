@@ -35,7 +35,7 @@ class ChatScreen extends MainWrapperStateful {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(person.displayName!),
+        title: Text('${person.displayName?? "N/A display name"}${_auth.currentUser!.uid == person.uid? " (You)" : ""}'),
         actions: [
           IconButton(
             icon: Icon(Icons.phone),

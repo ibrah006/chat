@@ -38,7 +38,7 @@ class HomeScreen extends MainWrapperStateful {
 
   // for playing a small sound on notification while inside '/chat' screen
   final AudioPlayer audioPlayer = AudioPlayer();
-  static const audioPath = "bubble.mp3";
+  static const audioPath = "audio/bubble.mp3";
 
   // when a message comes in for the current user, it is stored inside this until read in the chat_screen
   final List<Message> messagesSource = [];
@@ -71,12 +71,11 @@ class HomeScreen extends MainWrapperStateful {
 
       messagesSource.add(formattedRemoteMessage);
       if (Get.currentRoute != "/chat") {
-        InAppNotification.show(formattedRemoteMessage );
-      } else {
         // play sound
-        audioPlayer.play(AssetSource(audioPath));
-        
+        InAppNotification.show(formattedRemoteMessage );
       }
+
+      AudioPlayer().play(AssetSource(audioPath));
       messagesController.data.add(formattedRemoteMessage);
     });
 

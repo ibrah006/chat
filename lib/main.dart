@@ -11,6 +11,7 @@ import 'package:chat/services/providers/messages_state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +68,10 @@ void main(List<String> args) async {
   runApp(OverlaySupport.global(
     child: GetMaterialApp(
       theme: ThemeData(
-        useMaterial3: true
+        useMaterial3: true,
+        textTheme: GoogleFonts.poppinsTextTheme(
+          TextTheme()
+        ),
       ),
       navigatorKey: navigatorKey,
       // home: HomeScreen(),

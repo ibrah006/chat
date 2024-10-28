@@ -55,6 +55,7 @@ dependencies:
   provider: ^6.1.2
   overlay_support: ^2.1.0
   audioplayers: ^6.1.0
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +79,7 @@ flutter:
   assets:
     - assets/service-account-key.json
     - assets/.env
-    - assets/bubble.mp3
+    - assets/audio/bubble.mp3
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
