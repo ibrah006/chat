@@ -43,29 +43,33 @@ class ChatScreen extends MainWrapperStateful {
           )
         ]
       ),
-      body: Obx(
-        () {
+      body: SingleChildScrollView(
+        child: Obx(
+          () {
+        
+            final messages = messagesController.data;
+        
+            return Column(
+              children: [
+                ...List.generate(
+                  messages.length, (index) {
+                    final Message message = messages[index];
+            
+                    print("is message a call: ${message.details.type}");
+        
+                    // TODO: fix this. this may be a tempoorary solution only.
+                    if (
+                      message.fromUserUid == person.uid && person.uid !=_auth.currentUser!.uid ||
+                        (message.fromUserUid == _auth.currentUser!.uid && message.details.uid == person.uid)) {
+                      return message.details.type == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details); 
+                    }
 
-          final messages = messagesController.data;
-
-          return Column(
-            children: [
-              ...List.generate(
-                messages.length, (index) {
-                  final Message message = messages[index];
-          
-                  print("is message a call: ${message.details.type}");
-
-                  // TODO: fix this. this may be a tempoorary solution only.
-                  if (message.details.uid != person.uid) {
                     return SizedBox();
-                  }
-
-                  return message.details.type == NotificationType.message? MessageBubble(message) : CallBubble(callDetails: message.details);
-                }),
-            ]
-          );
-        }
+                  }),
+              ]
+            );
+          }
+        ),
       ),
       bottomNavigationBar: Row(
         children: [
@@ -80,19 +84,30 @@ class ChatScreen extends MainWrapperStateful {
   }
 
   Future<void> sendFCMMessage() async {
+    
 
-    final Message message = Message(Uuid().v1(), messageController.text, CallDetails.fromUserInfo(person, null), fromUserUid: _auth.currentUser!.uid);
+    final Message message = Message(
+      Uuid().v1(),
+      messageController.text,
+      CallDetails.fromUserInfo(Person.fromFirebaseAuth(_auth), null),
+      fromUserUid: _auth.currentUser!.uid);
 
     final notiTitle = _auth.currentUser!.displayName!;
     final notiBody = message.text;
 
-    await SendPushNotification().sendNotification(
-      info: NotificationInfo(
-        notiTitle, notiBody, message.details.fcmToken, type: NotificationType.message
-      ),
-      message: message
-    );
+    if (person.uid != _auth.currentUser!.uid) {
+      // can't pass in message.details.fcmToken instead of person.fcmToken as the former holds the value(fcm token) of the current user in all scenarios
+      await SendPushNotification().sendNotification(
+        info: NotificationInfo(
+          notiTitle, notiBody, person.fcmToken, type: NotificationType.message
+        ),
+        message: message
+      );
+    } else {
+      // still make sure the data is saved to the local database
+    }
 
+    message.details = CallDetails.fromUserInfo(person, null);
     setState(() {
       messagesController.data.add(message);
     });
@@ -107,6 +122,7 @@ class ChatScreen extends MainWrapperStateful {
 
     setState(() {
       messagesController.data.add(message);
+
     });
 
     await Get.toNamed(

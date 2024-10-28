@@ -23,7 +23,7 @@ class Message {
   /// this is auto unless specified
   late final DateTime datetime;
   // Can be of the instance CallDetails or Person itself
-  final CallDetails details;
+  CallDetails details;
 
   late final NotificationType notificationType;
 
