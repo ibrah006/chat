@@ -1,112 +1,11 @@
 
-
-import 'package:chat/components/static/login_main.dart';
-import 'package:chat/components/static/set_display_name.dart';
-import 'package:chat/widget_main.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class LoginScreen extends MainWrapperStateful {
-  LoginScreen(this.currentDeviceFcmToken);
-
-  final String currentDeviceFcmToken;
-
-  static const Iterable _quickLogins = [
-    "ibrah@chatly.com",
-    "dell@chatly.com",
-    "flutteremu@chatly.com",
-    "samsung@chatly.com"
-  ];
-
-
-  final emailController = TextEditingController(), passController = TextEditingController(), displayNameController = TextEditingController(), confirmPassController = TextEditingController();
-
-  final auth = FirebaseAuth.instance;
-
-  bool showDisplayNameInput = false;
-
-  bool isLogin = true;
-
-  void login() async {
-    if (!emailController.text.isEmail && passController.text.trim().isEmpty) {
-      // TODO: show erro feedback to user
-      return;
-    }
-
-    await auth.signInWithEmailAndPassword(email: emailController.text, password: passController.text);
-
-    authenticationCheck(isLogin: true);
-  }
-
-  void checkAuthStatus() async {
-    await Future.delayed(Duration(seconds: 1));
-    if (auth.currentUser != null) {
-      authenticationCheck();
-    }
-  }
-
-  String selectedQuickLogin = _quickLogins.elementAt(0);
-
-  void updateFields() {
-    emailController.text = selectedQuickLogin;
-    passController.text = "12345678";
-  }
-
-  void authenticationCheck({bool isLogin = false}) {
-    // run this function whether sign in/up
-
-    if (auth.currentUser!.displayName == null || auth.currentUser!.displayName!.isEmpty) {
-      setState(() {
-        showDisplayNameInput = true;
-      });
-    } else if (isLogin) {
-      updateDisplayName(null);
-    } else {
-      Navigator.popAndPushNamed(context, "/");
-    }
-  }
-
-  Future<void> updateDisplayName(String? displayNameInputted) async {
-    String displayName = displayNameInputted?? "";
-
-    try {
-      displayName = displayName.isEmpty? auth.currentUser!.displayName!.split("%20%")[0] : displayName;
-    } catch (e) {
-      // expected error cause: displayName == null when hit "continue" when promted
-      // TODO: show feedback
-    }
-
-    debugPrint("display name from over here: $displayName");
-
-    if (displayName.isNotEmpty) {
-
-      final displayNameAuth = auth.currentUser!.displayName;
-
-      if (displayNameAuth?.split("%20%")[1] != currentDeviceFcmToken) {
-        print("Change in fcm token for user of this email... updating...");
-        await auth.currentUser!.updateDisplayName("$displayName%20%$currentDeviceFcmToken");
-        print("FCM Token updated.");
-      }
-
-      Navigator.popAndPushNamed(context, "/");
-    } else {
-      // TODO: error feedback to user 'Please type in your display name'
-    }
-  }
-
-  late final Size screenSize;
-
-  @override
+class LoginMain extends StatelessWidget {
+   @override
   Widget build(BuildContext context) {
-
-    try {
-      screenSize = MediaQuery.of(context).size;
-    } catch(e) {}
-
-    return showDisplayNameInput? SetDisplayNameScreen(updateDisplayName) : Scaffold(
+    return Scaffold(
       body: Stack(
         children: [
           Container(
@@ -127,7 +26,7 @@ class LoginScreen extends MainWrapperStateful {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    isLogin? 'Hello Again!' : "Hello, Welcome!",
+                    'Hello Again!',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -137,7 +36,7 @@ class LoginScreen extends MainWrapperStateful {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    isLogin? "Welcome back, you've been missed!" : "Welcome to chat! All your chats in one place.",
+                    "Welcome back, you've been missed!",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.black87,
@@ -157,9 +56,8 @@ class LoginScreen extends MainWrapperStateful {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextField(
-                      controller: emailController,
                       decoration: InputDecoration(
-                        hintText: 'Enter email',
+                        hintText: 'Enter username',
                         hintStyle: GoogleFonts.poppins(
                           color: Colors.grey,
                           fontSize: 14,
@@ -188,7 +86,6 @@ class LoginScreen extends MainWrapperStateful {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: TextField(
-                      controller: passController,
                       obscureText: true,
                       decoration: InputDecoration(
                         hintText: 'Password',
@@ -208,41 +105,8 @@ class LoginScreen extends MainWrapperStateful {
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
-                  isLogin? SizedBox() : Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(.03), // Shadow color
-                          blurRadius: 23.5,        // Spread of the shadow
-                          offset: Offset(0, 4),  // Position of the shadow
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextField(
-                      controller: confirmPassController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Confirm password',
-                        hintStyle: GoogleFonts.poppins(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
-                        contentPadding: EdgeInsets.all(17),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        filled: true,
-                        // fillColor: Colors.grey[100],
-                        fillColor: Colors.white,
-                        suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.grey.shade400, size: 19),
-                      ),
-                    ),
-                  ),
                   SizedBox(height: 20),
-                  isLogin? Align(
+                  Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {},
@@ -254,7 +118,7 @@ class LoginScreen extends MainWrapperStateful {
                         ),
                       ),
                     ),
-                  ) : SizedBox(),
+                  ),
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {},
@@ -266,21 +130,21 @@ class LoginScreen extends MainWrapperStateful {
                       ),
                     ),
                     child: Text(
-                      isLogin? 'Sign In' : "Resgister",
+                      'Sign In',
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                   SizedBox(height: 32),
-                  // Row(
-                  //   children: [
-                  //     Expanded(child: Divider()),
-                  //     Padding(
-                  //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  //       child: Text('Or continue with'),
-                  //     ),
-                  //     Expanded(child: Divider()),
-                  //   ],
-                  // ),
+                  Row(
+                    children: [
+                      Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: Text('Or continue with'),
+                      ),
+                      Expanded(child: Divider()),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -310,12 +174,5 @@ class LoginScreen extends MainWrapperStateful {
         ],
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    
-    checkAuthStatus();
   }
 }
