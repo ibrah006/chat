@@ -1,4 +1,6 @@
 import 'package:chat/constants/serviceAccCred.dart';
+import 'package:chat/databases/local_database.dart';
+import 'package:chat/databases/tables.dart';
 import 'package:chat/screens/call.dart';
 import 'package:chat/screens/chat.dart';
 import 'package:chat/screens/home.dart';
@@ -6,15 +8,14 @@ import 'package:chat/screens/login.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
-import 'package:chat/services/provider/messages_manager.dart';
-import 'package:chat/services/providers/messages_state.dart';
+import 'package:chat/services/provider/provider_managers.dart';
+import 'package:chat/users/person.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:provider/provider.dart';
 
 // const ROOMOWNER = 'mohammed';
 const CALLTYPE = CallType.video;
@@ -64,6 +65,10 @@ void main(List<String> args) async {
 
   // Inject the MessagesManager (provider)
   Get.put(MessagesManager());
+
+  // Inject the FriendsManager (provider)
+  final rawFriends = await LocalDatabase.get(Tables.chats);
+  Get.put(FriendsManager(Person.fromIterableMap(rawFriends)));
 
   runApp(OverlaySupport.global(
     child: GetMaterialApp(

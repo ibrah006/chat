@@ -77,6 +77,7 @@ class NotificationInfo {
 class InAppNotification {
 
   static _toChatScreen(context, Message message) async {
+    OverlaySupportEntry.of(context)?.dismiss();
 
     // check to see if user is already in chatscreen
     if (Get.currentRoute == "/chat") {
@@ -91,8 +92,6 @@ class InAppNotification {
 
     // adds friend to the table if doesn't already exist
     await UsersManager.addNewFriend(message.details.email!, userData: message.details);
-
-    OverlaySupportEntry.of(context)?.dismiss();
   }
 
   static show(Message message) {
@@ -103,7 +102,9 @@ class InAppNotification {
       (context) {
         return SafeArea(
           child: GestureDetector(
-            onTap: ()=> _toChatScreen(context, message),
+            onTap: () async {
+              _toChatScreen(context, message);
+            },
             child: Container(
               padding: const EdgeInsets.all(16.0),
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -182,7 +183,7 @@ class InAppNotification {
                     ],
                   ) : IconButton(
                     icon: Icon(Icons.reply_rounded, color: Colors.grey.shade500),
-                    onPressed: ()=> _toChatScreen(context, message),
+                    onPressed: ()=> null//_toChatScreen(context, message),
                   )
                 ],
               ),

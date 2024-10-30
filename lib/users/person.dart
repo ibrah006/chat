@@ -1,6 +1,7 @@
 
 
 import 'package:chat/main.dart';
+import 'package:chat/services/messages/message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +24,8 @@ class Person implements NotificationInfo {
   String? displayName;
 
   bool debugErrorFromPast = false;
+
+  Message? lastMessage;
 
   static List<Person> fromIterableMap(List<Map<String, dynamic>> data) {
     return data.map((e)=> fromMap(e)).toList();

@@ -8,7 +8,7 @@ import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
-import 'package:chat/services/provider/state_controller/messages_controller.dart';
+import 'package:chat/services/provider/state_controller/state_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -29,6 +29,8 @@ class ChatScreen extends MainWrapperStateful {
 
   //
   final MessagesController messagesController = Get.put(MessagesController());
+
+  final FriendsController friendsController = Get.put(FriendsController());
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +86,6 @@ class ChatScreen extends MainWrapperStateful {
   }
 
   Future<void> sendFCMMessage() async {
-    
 
     final Message message = Message(
       Uuid().v1(),
@@ -108,9 +109,13 @@ class ChatScreen extends MainWrapperStateful {
     }
 
     message.details = CallDetails.fromUserInfo(person, null);
+    // message that was just sent is obv read by the current user
+    message.isRead = true;
     setState(() {
       messagesController.data.add(message);
     });
+
+    friendsController.updateLastMessage(message);
   }
 
   void startCall() async {

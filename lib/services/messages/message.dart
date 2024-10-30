@@ -8,10 +8,12 @@ class Message {
   Message(
     this.id,
     this.text,
-    this.details, {
+    this.details,
+    {
     final DateTime? timestamp,
     this.notificationType = NotificationType.message,
-    required this.fromUserUid
+    required this.fromUserUid,
+    this.isRead = true
   }) {
     datetime = timestamp?? DateTime.now();
   }
@@ -30,6 +32,8 @@ class Message {
   final String fromUserUid;
 
   bool get isSender => fromUserUid == FirebaseAuth.instance.currentUser!.uid;
+
+  bool isRead;
 
   @deprecated
   CallDetails? callDetails;

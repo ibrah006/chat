@@ -1,15 +1,11 @@
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
-import 'package:chat/constants/dialogs.dart';
 import 'package:chat/databases/local_database.dart';
 import 'package:chat/databases/tables.dart';
-import 'package:chat/main.dart';
-import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_service.dart' show handleMessage;
 import 'package:chat/services/notification/send_notification.dart';
-import 'package:chat/services/provider/state_controller/messages_controller.dart';
+import 'package:chat/services/provider/state_controller/state_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
@@ -17,14 +13,12 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat/components/custom_radios.dart';
 import 'package:chat/services/messages/message.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
   final TextEditingController searchController = TextEditingController();
-
-  List<Person> friends = [];
 
   final firebase_auth.FirebaseAuth auth = firebase_auth.FirebaseAuth.instance;
 
@@ -44,6 +38,8 @@ class HomeScreen extends MainWrapperStateful {
   final List<Message> messagesSource = [];
 
   final MessagesController messagesController = Get.put(MessagesController());
+  
+  final FriendsController friendsController = Get.put(FriendsController());
 
   @override
   void initState() {
@@ -52,7 +48,7 @@ class HomeScreen extends MainWrapperStateful {
     // TODO: show a loading screen until this future is completed 
     LocalDatabase.get(Tables.chats).then((rawFriends) {
       setState(() {
-        friends = Person.fromIterableMap(rawFriends);
+        friendsController.data = Person.fromIterableMap(rawFriends).obs;
       });
     });
 
@@ -72,8 +68,11 @@ class HomeScreen extends MainWrapperStateful {
       messagesSource.add(formattedRemoteMessage);
       if (Get.currentRoute != "/chat") {
         // play sound
-        InAppNotification.show(formattedRemoteMessage );
+        InAppNotification.show(formattedRemoteMessage);
+        formattedRemoteMessage.isRead = false;
       }
+
+      friendsController.updateLastMessage(formattedRemoteMessage);
 
       AudioPlayer().play(AssetSource(audioPath));
       messagesController.data.add(formattedRemoteMessage);
@@ -95,179 +94,194 @@ class HomeScreen extends MainWrapperStateful {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        backgroundColor: Color(0xFFE3F2FD),
+        elevation: 0,
+        title: Text(
+          'Chats',
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
         actions: [
           IconButton(
-            onPressed: logout,
-            icon: Icon(Icons.logout))
-        ]
+            icon: Icon(Icons.notifications_none, color: Colors.black87),
+            onPressed: () {
+              // Notification action
+            },
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(Icons.account_circle, color: Colors.black87, size: 30),
+            onPressed: () {
+              // Profile action
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: searchController,
-                ),
-              ),
-              IconButton(
-                onPressed: addCallback,
-                icon: Icon(Icons.add)
-              )
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment.topCenter,
+            radius: 6,
+            colors: [
+              Color(0xFFE3F2FD), // Light blue for gradient effect
+              Color(0xFFFFFFFF), // White for subtle transition
             ],
           ),
-          Expanded(
-            child: CustomRadios(
-              onChanged: (index) {
-                fcmRadioOption = friends[index].fcmToken;
-              },
-              children: List.generate(
-                friends.length,
-                (index) {
-                  
-    
-                  final Person friend = friends[index];
-                  final String userFcmToken = friend.fcmToken;
-                  final bool showFcmWarning = userFcmToken.isEmpty;
-    
-                  print("friend: ${friend.toMap()}");
-    
-                  return ListTile(
-                    leading: !true? null : Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        Text("FCM", style: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.bold)),
-                        Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: TextButton(
-                            style: ButtonStyle(
-                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              minimumSize: WidgetStatePropertyAll(Size.zero),
-                              padding: WidgetStatePropertyAll(EdgeInsets.zero)
-                            ),
-                            onPressed: ()=> refreshFcmToken(index, friend.email!),
-                            child: Icon(Icons.refresh_rounded,),
-                          )
-                        )
-                      ],
+        ),
+        child: Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0,).copyWith(top: 30),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.03),
+                      blurRadius: 23.5,
+                      offset: Offset(0, 4),
                     ),
-                    title: Row(
-                      children: [
-                        Text('${friend.displayName?? "N/A display name"}${auth.currentUser!.uid == friend.uid? " (You)" : ""}'),
-                        ... showFcmWarning? [
-                          SizedBox(width: 13),
-                          Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-                          Icon(Icons.warning_rounded, color: Colors.red.shade400)
-                        ] : []
-                      ],
-                    ),
-                    subtitle: Text(friend.email.toString()),
-                    onTap: () {
-                      Get.toNamed("/chat", arguments: friend);
-                    },
-                    trailing: IconButton(
-                      onPressed: () {
-                        // send notifcation about the call
-                  
-                        Get.toNamed(
-                          "/call",
-                          arguments: CallDetails.fromUserInfo(friend, CALLTYPE).toMap()
-                        );
-                  
-                        //sendFCMMessage();
-                        
-                        // TODO: send this notification after intiating the call
-                      },
-                      icon: Icon(Icons.video_call_rounded),
-                    ),
-                  );
-                }
-              )
-            )
-          ),
-
-          ListTile(
-            leading: Checkbox(
-              value: debug.showTimeSinceStart,
-              onChanged: (newValue)=> setState(() {
-                debug.toggleShowTimeSinceStart(newState: newValue);
-              })
-            ),
-            title: Text("${debug.showTimeSinceStart? "Hide" : "Show"} time since.", style: TextStyle(fontSize: 12.5),),
-            trailing: debug.showTimeSinceStart? Text(DateManager.getDuration(sinceStart.elapsed)) : null
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  throw UnimplementedError("This method's functionality has been turned off temporarily");
-                  // SendPushNotification().sendNotification(
-                  //   info: NotificationInfo(
-                  //     "Sample notification title", "sample body", fcmRadioOption, type: NotificationType.call
-                  //   ),
-                  //   details: Person("sample", "sample@mail.com", fcmToken: fcmRadioOption)
-                  // );
-                },
-                style: const ButtonStyle(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  padding: WidgetStatePropertyAll(EdgeInsets.all(5)),
-                  minimumSize: WidgetStatePropertyAll(Size.zero)
-                ),
-                child: Text("Send FCM notification", style: TextStyle(fontSize: 12.5),)
-              ),
-              // show/hide time since checkbox
-              PopupMenuButton(
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.developer_mode_rounded),
-                    Text("Developer options"),
                   ],
                 ),
-                onSelected: (value) {},
-                itemBuilder: (BuildContext context) {
-                  return List<PopupMenuEntry<int>>.generate(
-                    1, (index) {
-              
-                      final option = ['Delete databases'][index];
-              
-                      return PopupMenuItem<int>(
-                        value: index,
-                        child: ListTile(
-                          dense: true,
-                          leading: [
-                            Icon(Icons.dataset),
-                          ][index],
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () async {
-                            final positiveClicked = await Dialogs.showAlertDialog(
-                              context,
-                              title: "Developer Action",
-                              body: 'Are you sure you want to dispatch "$option"',
-                              positiveText: "Yes",
-                            );
-              
-                            print("positive Cliked: $positiveClicked");
-              
-                            if (positiveClicked) {
-                              await DeveloperDebug.runOptions(index);
-                            }
-                          },
-                          title: Text(option),
-                        ),
-                      );
-                    }
-                  );
-                },
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Search chats...',
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    icon: Icon(Icons.search, color: Colors.grey),
+                  ),
+                ),
               ),
-            ],
-          )
-        ],
-      )
+            ),
+            SizedBox(height: 25),
+
+            // "Recent Chats" section
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recent Chats',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: GetBuilder<FriendsController>(
+                        builder: (context) {
+
+                          final friends = friendsController.data;
+
+                          return ListView.separated(
+                            itemCount: friends.length, // example count for recent chats
+                            separatorBuilder: (context, index) => Divider(
+                              thickness: 1,
+                              height: 1,
+                              color: Colors.grey.shade300,
+                            ),
+                            itemBuilder: (context, index) {
+                          
+                              final Person friend = friends[index];
+                              final String userFcmToken = friend.fcmToken;
+                              final bool showFcmWarning = userFcmToken.isEmpty;
+                                      
+                              print("friend: ${friend.toMap()}");
+                          
+                              final lastMessage = friend.lastMessage;
+                          
+                              return ListTile(
+                                contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+                                leading: CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor: Colors.grey.shade50,
+                                  child: Icon(Icons.person, color: Colors.grey),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Text(
+                                      '${friend.displayName?? "N/A display name"}${auth.currentUser!.uid == friend.uid? " (You)" : ""}',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    ... showFcmWarning? [
+                                      SizedBox(width: 13),
+                                      Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
+                                      Icon(Icons.warning_rounded, color: Colors.red.shade400)
+                                    ] : []
+                                  ],
+                                ),
+                                subtitle: lastMessage==null? null : Text(
+                                  "${lastMessage.isSender? "You: " : ""}${lastMessage.text}",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                trailing: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '12:34 PM',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    if (friend.lastMessage?.isRead == false)
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4),
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.shade400,//Color(0xFFFF6B6B),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: SizedBox()
+                                      ),
+                                  ],
+                                ),
+                                onTap: () async {
+                                  friendsController.updateLastMessageReadStatus(friend.uid!, true);
+                                  await Get.toNamed("/chat", arguments: friend);
+                                },
+                              );
+                            },
+                          );
+                        }
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Start new chat action
+        },
+        backgroundColor: Color(0xFFFF6B6B),
+        child: Icon(Icons.chat_bubble_outline, color: Colors.white),
+      ),
     );
   } 
 
@@ -280,11 +294,11 @@ class HomeScreen extends MainWrapperStateful {
   void refreshFcmToken(int index, String email) async {
 
     final updatedUserFcmToken = await UsersManager.updateUserFcmToken(email);
-    final Person user = friends.elementAt(index);
+    final Person user = friendsController.data.elementAt(index);
 
     user.fcmToken = updatedUserFcmToken;
     
-    friends[index] = user;
+    friendsController.data[index] = user;
     setState(() {});
   }
 
@@ -294,7 +308,7 @@ class HomeScreen extends MainWrapperStateful {
     final Person? userInfo = await UsersManager.addNewFriend(searchUserEmail);
     
     if (userInfo!=null) {
-      friends.add(userInfo);
+      friendsController.data.add(userInfo);
 
       setState(() {});
     }
