@@ -25,7 +25,7 @@ class FriendsController<T> extends GetxController {
     int friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
     if (friendIndex == -1) {
       data.add(lastMessage.details);
-      friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
+      friendIndex = data.length - 1;
     }
 
     data[friendIndex].lastMessage = lastMessage;
