@@ -336,7 +336,7 @@ class ChatConcept extends StatelessWidget {
           leading: Padding(
             padding: const EdgeInsets.only(top: 8, left: 10),
             child: CircleAvatar(
-              backgroundColor: Color(0xFF723EF5).withOpacity(.2),
+              backgroundColor: Color(0xFF247ff1).withOpacity(.2),
               child: Icon(Icons.person_rounded) // replace with actual image
             ),
           ),
@@ -348,9 +348,9 @@ class ChatConcept extends StatelessWidget {
             ],
           ),
           actions: [
-            Icon(Icons.phone, color: Color(0xFF723EF5)),
+            Icon(Icons.phone, color: Color(0xFF247ff1)),
             SizedBox(width: 20),
-            Icon(Icons.videocam, color: Color(0xFF723EF5)),
+            Icon(Icons.videocam, color: Color(0xFF247ff1)),
             SizedBox(width: 12),
           ],
         ),
@@ -382,7 +382,7 @@ class ChatConcept extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 4.0),
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Color(0xFFf9f9f9),
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(
@@ -404,7 +404,7 @@ class ChatConcept extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 4.0),
         padding: EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Color(0xFF723EF5), // purple color for sent message
+          color: Color(0xFF247ff1), // purple color for sent message
           borderRadius: BorderRadius.circular(8.0),
         ),
         child: Column(
@@ -449,7 +449,7 @@ class ChatConcept extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.camera_alt, color: Color(0xFF723EF5)),
+          Icon(Icons.camera_alt, color: Color(0xFF247ff1)),
           SizedBox(width: 8),
           Expanded(
             child: TextField(
@@ -463,11 +463,371 @@ class ChatConcept extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8),
-          Icon(Icons.image, color: Color(0xFF723EF5)),
+          Icon(Icons.image, color: Color(0xFF247ff1)),
           SizedBox(width: 8),
-          Icon(Icons.send, color: Color(0xFF723EF5)),
+          Icon(Icons.send, color: Color(0xFF247ff1)),
         ],
       ),
+    );
+  }
+}
+
+class HomeConceptTwo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Color(0xFFF5F6FA),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text(
+            'Chats',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.search, color: Colors.grey[700]),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(Icons.more_vert, color: Colors.grey[700]),
+              onPressed: () {},
+            ),
+          ],
+          centerTitle: true,
+        ),
+        body: ListView(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          children: [
+            _buildChatTile(
+              avatarUrl: 'https://example.com/avatar1.jpg',
+              name: 'Adhitya Panth',
+              message: 'Can you check my project at once?',
+              time: '12:23 PM',
+              isOnline: true,
+            ),
+            _buildChatTile(
+              avatarUrl: 'https://example.com/avatar2.jpg',
+              name: 'Sara Ali',
+              message: 'Sure! Let me send you the link.',
+              time: '11:45 AM',
+              isOnline: false,
+            ),
+            _buildChatTile(
+              avatarUrl: 'https://example.com/avatar3.jpg',
+              name: 'John Doe',
+              message: 'Looking forward to our meeting!',
+              time: 'Yesterday',
+              isOnline: true,
+            ),
+            // Add more _buildChatTile as needed
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xFF6C63FF),
+          child: Icon(Icons.message, color: Colors.white),
+          onPressed: () {
+            // Action for starting a new chat
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatTile({
+    required String avatarUrl,
+    required String name,
+    required String message,
+    required String time,
+    required bool isOnline,
+  }) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 6.0),
+      padding: EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundImage: NetworkImage(avatarUrl),
+              ),
+              if (isOnline)
+                Positioned(
+                  bottom: 2,
+                  right: 2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  message,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                time,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LoginConcept extends StatelessWidget {
+  const LoginConcept({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Color(0xFFF5F6FA),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // App Logo or Title
+                Text(
+                  'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Please log in to continue',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 40),
+                
+                // Email Text Field
+                _buildTextField(
+                  hintText: 'Email Address',
+                  icon: Icons.email_outlined,
+                ),
+                SizedBox(height: 16),
+
+                // Password Text Field
+                _buildTextField(
+                  hintText: 'Password',
+                  icon: Icons.lock_outline,
+                  isPassword: true,
+                ),
+                
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // Add Forgot Password functionality here
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Color(0xFF6C63FF),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Sign In Button
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle sign-in logic here
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF6C63FF),
+                    padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 80.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: Text(
+                    'Sign In',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                
+                SizedBox(height: 24),
+
+                // Divider with "or"
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey[400],
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'or',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey[400],
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+
+                // Social Login Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSocialButton(
+                      icon: Icons.facebook,
+                      color: Color(0xFF3b5998),
+                      onPressed: () {
+                        // Facebook login logic
+                      },
+                    ),
+                    SizedBox(width: 20),
+                    _buildSocialButton(
+                      icon: Icons.g_mobiledata,
+                      color: Color(0xFFdb4437),
+                      onPressed: () {
+                        // Google login logic
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 30),
+
+                // Sign Up Option
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Don't have an account?",
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to Sign Up screen
+                      },
+                      child: Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          color: Color(0xFF6C63FF),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Reusable TextField Widget
+  Widget _buildTextField({required String hintText, required IconData icon, bool isPassword = false}) {
+    return TextField(
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hintText,
+        prefixIcon: Icon(icon, color: Colors.grey[500]),
+        contentPadding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  // Reusable Social Button Widget
+  Widget _buildSocialButton({required IconData icon, required Color color, required VoidCallback onPressed}) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: CircleBorder(),
+        padding: EdgeInsets.all(16),
+      ),
+      child: Icon(icon, color: Colors.white, size: 28),
     );
   }
 }

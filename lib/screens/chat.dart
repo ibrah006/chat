@@ -3,6 +3,7 @@
 
 import 'package:chat/components/bubbles/callBubble.dart';
 import 'package:chat/components/bubbles/messageBubble.dart';
+import 'package:chat/components/static/concepts.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
@@ -35,7 +36,7 @@ class ChatScreen extends MainWrapperStateful {
   @override
   Widget build(BuildContext context) {
 
-    return Scaffold(
+    return true? ChatConcept() : Scaffold(
       appBar: AppBar(
         title: Text('${person.displayName?? "N/A display name"}${_auth.currentUser!.uid == person.uid? " (You)" : ""}'),
         actions: [
