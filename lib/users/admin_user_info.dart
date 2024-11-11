@@ -54,13 +54,16 @@ static Future<Person?> getUserInfo(String email) async {
   static Map<String, dynamic> _convertAdminFetchedUserInfo(Map<String, dynamic> adminUserInfo) {
     final userUid = adminUserInfo["localId"];
 
+    // catching an error when user tries to add a users who have signed up but not yet set thier display name / fcm token
     //TODO: urgent- set display name to "$displayName%20%$fcmToken"
-    final displayNameFCMToken = adminUserInfo["displayName"].toString().split("%20%");
-    final displayName = displayNameFCMToken[0];
-    final fcmToken = displayNameFCMToken[1];
+    try {
+      final displayNameFCMToken = adminUserInfo["displayName"].toString().split("%20%");
+      final displayName = displayNameFCMToken[0];
+      final fcmToken = displayNameFCMToken[1];
 
-    adminUserInfo["displayName"] = displayName;
-    adminUserInfo["fcmToken"] = fcmToken;
+      adminUserInfo["displayName"] = displayName;
+      adminUserInfo["fcmToken"] = fcmToken;
+    } on RangeError {}
 
     adminUserInfo["uid"] = userUid;
     adminUserInfo.remove("localId");

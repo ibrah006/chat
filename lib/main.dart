@@ -5,6 +5,7 @@ import 'package:chat/screens/call.dart';
 import 'package:chat/screens/chat.dart';
 import 'package:chat/screens/home.dart';
 import 'package:chat/screens/login.dart';
+import 'package:chat/screens/user_search.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
@@ -85,7 +86,8 @@ void main(List<String> args) async {
         GetPage(name: "/", page: ()=> HomeScreen()),
         GetPage(name: "/login", page: ()=> LoginScreen(fcmToken)),
         GetPage(name: "/call", page: ()=> CallScreen()),
-        GetPage(name: "/chat", page: ()=> ChatScreen())
+        GetPage(name: "/chat", page: ()=> ChatScreen()),
+        GetPage(name: "/search", page: ()=> UserSearchScreen())
       ],
     ),
   ));

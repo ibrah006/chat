@@ -6,12 +6,7 @@ import 'package:get/get.dart';
 
 class UsersManager {
 
-  static Future<Person?> addNewFriend(String email, {Person? userData}) async {
-
-    if (userData!=null) {
-      
-    }
-
+  static Future<Person?> searchUser(String email) async {
     if (email.isEmail) {
       final userInfo = await AdminUserInfo.getUserInfo(email);
 
@@ -19,10 +14,26 @@ class UsersManager {
         // user found
         print("user's uid found: ${userInfo.uid}");
 
-        await ChatsTable.insert(ChatsTableRow(userInfo));
         return userInfo;
       }
     }
+    return null;
+  }
+
+  static Future<Person?> addNewFriend(String email, {Person? userData}) async {
+
+    if (userData!=null) {
+      await ChatsTable.insert(ChatsTableRow(userData));
+      return userData;
+    }
+
+    final userInfo = await searchUser(email);
+    if (userInfo!=null) {
+      await ChatsTable.insert(ChatsTableRow(userInfo));
+      return userInfo;
+    }
+
+    
     return null;
   }
 

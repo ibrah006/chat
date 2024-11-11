@@ -22,7 +22,12 @@ class FriendsController<T> extends GetxController {
   final FriendsManager apiService = Get.find();
 
   updateLastMessage(Message lastMessage) {
-    final friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
+    int friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
+    if (friendIndex == -1) {
+      data.add(lastMessage.details);
+      friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
+    }
+
     data[friendIndex].lastMessage = lastMessage;
     update();
   }
