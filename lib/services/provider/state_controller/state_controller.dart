@@ -1,3 +1,4 @@
+import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:chat/users/person.dart';
 import 'package:get/get.dart';
@@ -12,6 +13,16 @@ class MessagesController<T> extends GetxController {
   void fetchData() {
     data.value = apiService.messages;
   }
+
+  void onCallEnd(Message callMessage) {
+    final messageIndex = data.indexWhere((message)=> message.id == callMessage.id);
+
+    data[messageIndex].details.state = CallState.ended;
+    data[messageIndex].details.duration = callMessage.details.duration;
+
+    update();
+  }
+
 }
 
 class FriendsController<T> extends GetxController {

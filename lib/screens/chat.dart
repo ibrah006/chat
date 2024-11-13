@@ -2,8 +2,6 @@
 
 
 import 'package:chat/components/bubbles/callBubble.dart';
-import 'package:chat/components/bubbles/messageBubble.dart';
-import 'package:chat/components/static/concepts.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
@@ -15,7 +13,6 @@ import 'package:chat/widget_main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -35,48 +32,59 @@ class ChatScreen extends MainWrapperStateful {
 
   final FriendsController friendsController = Get.put(FriendsController());
 
+  var isOnline = false;
+
+  bool get isYourself => person.uid == _auth.currentUser!.uid;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
-        leadingWidth: 60,
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 10),
-          child: CircleAvatar(
-            backgroundColor: Color(0xFF7233f5).withOpacity(.2),
-            child: Icon(Icons.person_rounded) // replace with actual image
-          ),
+        backgroundColor: Colors.white,  // AppBar background color set to white
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text('${person.displayName?? "N/A display name"}${_auth.currentUser!.uid == person.uid? " (You)" : ""}'),
-            Text('Online', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Color(0xFF6C63FF).withOpacity(.35),
+              child: Icon(Icons.person, size: 27, color: Colors.black87)
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  person.displayName!,
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  isOnline ? 'Online' : 'Offline',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
           IconButton(
-            onPressed: null,
-            icon: Icon(Icons.phone),
-            color: Color(0xFF7233f5)
+            onPressed: isYourself? null : null,
+            icon: Icon(Icons.call_rounded)
           ),
-          SizedBox(width: 20),
+          SizedBox(width: 6),
           IconButton(
-            onPressed: startCall,
-            icon: Icon(Icons.videocam),
-            color: Color(0xFF7233f5)
+            onPressed: isYourself? null : startCall,
+            icon: Icon(Icons.videocam_rounded)
           ),
-          SizedBox(width: 12),
         ],
       ),
       body: Column(
         children: [
           Expanded(
-            child:
-            Obx(
+            child: Obx(
               () {
                 final messages = messagesController.data;
 
@@ -85,139 +93,127 @@ class ChatScreen extends MainWrapperStateful {
                   children: [
                     ...List.generate(
                       messages.length, (index) {
-                      final Message message = messages[index];
-                          
-                      print("is message a call: ${message.details.type}");
+                        final Message message = messages[index];
 
-                      final time = DateFormat("hh:mm a").format(message.datetime);
-                      
-                      // TODO: fix this. this may be a tempoorary solution only.
-                      if (
-                        message.fromUserUid == person.uid && person.uid !=_auth.currentUser!.uid ||
-                          (message.fromUserUid == _auth.currentUser!.uid && message.details.uid == person.uid)) {
-                        return message.details.type == NotificationType.message?
-                          message.isSender? _buildSentMessage(message.text, time) : _buildReceivedMessage(message.text, time)
-                          : CallBubble(
-                            isMissed: message.details.state! == CallState.missed,
-                            callType: message.details.callType!.name.capitalizeFirst!,
-                            callTime: DateFormat("hh:mm a").format(message.datetime),
-                            duration: (message.details.duration!=null? (message.details.duration!.inSeconds > 0? "${message.details.duration!.inSeconds} minutes" : "${message.details.duration!.inMinutes} seconds") : "N/A").toString(),
-                          ); 
+                        print("is message a call: ${message.details.type}");
+
+                        print("call duration: ${message.details.duration}");
+
+                        // TODO: fix this. this may be a tempoorary solution only.
+                        if (
+                          message.fromUserUid == person.uid && person.uid !=_auth.currentUser!.uid ||
+                            (message.fromUserUid == _auth.currentUser!.uid && message.details.uid == person.uid)) {
+                          return message.details.type == NotificationType.message?
+                            _buildMessageBubble(message)
+                            : CallBubble(
+                              callMessage: message,
+                              callState: message.details.state!,
+                              callType: message.details.callType!.name.capitalizeFirst!,
+                              callTime: DateFormat("hh:mm a").format(message.datetime),
+                              duration: (message.details.duration!=null? (message.details.duration!.inSeconds > 0? "${message.details.duration!.inSeconds} seconds" : "${message.details.duration!.inMinutes} minutes") : "N/A").toString(),
+                            ); 
+                        }
+                  
+                        return SizedBox();
                       }
-                
-                      return SizedBox();
-                    })
-                  ],
+                    )
+                  ]
                 );
               }
             ),
-
           ),
-          _buildMessageInputField(),
+          _buildMessageInput(),
         ],
       ),
+      backgroundColor: Colors.grey[100],  // Background color set to light grey
     );
   }
 
-  Widget _buildReceivedMessage(String text, String time) {
+  Widget _buildMessageBubble(Message message) {
+
+    bool isLink = false;
+
+    final time = DateFormat("hh:mm a").format(message.datetime);
+
+    final isSender = message.isSender;
+
     return Align(
-      alignment: Alignment.centerLeft,
+      alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4.0),
-        padding: EdgeInsets.all(12.0),
+        margin: EdgeInsets.symmetric(vertical: 6),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Color(0xFFf9f9f9),
-          borderRadius: BorderRadius.circular(8.0),
+          color: isSender ? Color(0xFF6C63FF) : Colors.white70,  // Sent bubble: #6C63FF, Received bubble: light grey
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+            bottomLeft: isSender ? Radius.circular(12) : Radius.circular(0),
+            bottomRight: isSender ? Radius.circular(0) : Radius.circular(12),
+          ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(text),
-            SizedBox(height: 4),
-            Text(time, style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey)),
+            isLink
+                ? GestureDetector(
+                    onTap: () {
+                      // Open link
+                    },
+                    child: Text(
+                      message.text,
+                      style: TextStyle(color: Colors.blue[200], decoration: TextDecoration.underline),
+                    ),
+                  )
+                : Text(
+                    message.text,
+                    style: TextStyle(
+                      color: isSender ? Colors.white : Colors.black87,
+                    ),
+                  ),
+            SizedBox(height: 5),
+            Text(
+              time,
+              style: TextStyle(fontSize: 10, color: isSender ? Colors.white70 : Colors.grey[600]),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSentMessage(String text, String time) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 4.0),
-        padding: EdgeInsets.all(12.0),
-        decoration: BoxDecoration(
-          color: Color(0xFF7233f5), // purple color for sent message
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(text, style: GoogleFonts.poppins(color: Colors.white)),
-            SizedBox(height: 4),
-            Text(time, style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[300])),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReceivedImageMessage() {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.network(
-            'https://example.com/image.jpg', // replace with actual image
-            width: 200,
-          ),
-          SizedBox(height: 4),
-          Text(
-            'https://www.figma.com/file/chatappsdesign...',
-            style: TextStyle(color: Colors.blue),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageInputField() {
+  Widget _buildMessageInput() {
     return Container(
-      margin: EdgeInsets.all(10),
-      padding: EdgeInsets.symmetric(horizontal: 17, vertical: 8),
-      decoration: BoxDecoration(
-        color: Color.fromARGB(255, 248, 248, 247),
-        borderRadius: BorderRadius.circular(35)
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,  // Background color of message input area set to white
       child: Row(
         children: [
-          Icon(Icons.camera_alt, color: Color(0xFF7233f5)),
-          SizedBox(width: 8),
+          IconButton(
+            icon: Icon(Icons.add, color: Color(0xFF6C63FF)),
+            onPressed: () {},
+          ),
           Expanded(
-            child: TextField(
-              controller: messageController,
-              decoration: InputDecoration(
-                hintStyle: TextStyle(color: Colors.grey.shade400),
-                hintText: 'Type Here...',
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],  // Text field container color set to light grey
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: TextField(
+                controller: messageController,
+                decoration: InputDecoration(
+                  hintText: "Type a message...",
+                  border: InputBorder.none,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 8),
-          Icon(Icons.image, color: Color(0xFF7233f5)),
-          SizedBox(width: 8),
           IconButton(
+            icon: Icon(Icons.camera_alt, color: Color(0xFF6C63FF)),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.send, color: Color(0xFF6C63FF)),
             onPressed: sendFCMMessage,
-            style: ButtonStyle(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              padding: WidgetStatePropertyAll(EdgeInsets.all(5)),
-              minimumSize: WidgetStatePropertyAll(Size.zero)
-            ),
-            icon: Icon(Icons.send, color: Color(0xFF7233f5))
           ),
         ],
       ),
@@ -225,6 +221,10 @@ class ChatScreen extends MainWrapperStateful {
   }
 
   Future<void> sendFCMMessage() async {
+
+    if (messageController.text.trim().isEmpty) {
+      return;
+    }
 
     final Message message = Message(
       Uuid().v1(),
@@ -274,7 +274,7 @@ class ChatScreen extends MainWrapperStateful {
       arguments: message.toMap()
     );
 
-    message.details.state = CallState.ended;
+    // message.details.state = CallState.ended;
     setState(() {});
   }
 

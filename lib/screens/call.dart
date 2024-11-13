@@ -22,6 +22,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:chat/constants/date.dart';
+import 'package:chat/services/provider/state_controller/state_controller.dart';
 
 class CallScreen extends MainWrapperStateful {
 
@@ -53,6 +54,8 @@ class CallScreen extends MainWrapperStateful {
   // will only be null once (initially)
   Stream? callTimeStream;
   Stopwatch callTime = Stopwatch();
+
+  final MessagesController messagesController = Get.put(MessagesController());
 
   @override
   void dispose() {
@@ -128,6 +131,13 @@ class CallScreen extends MainWrapperStateful {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
 
+    // call duration set
+    // callMessage.details.state = CallState.ended;
+
+    //TODO: buggy
+    callMessage.details.duration = callTime.elapsed;
+    messagesController.onCallEnd(callMessage);
+    
     try {
       signaling.hangUp(_localRenderer, caller: roomOwner);   
     } catch(e) {
@@ -219,7 +229,9 @@ class CallScreen extends MainWrapperStateful {
                             onSpeakerToggle: callOptions.toggleSpeaker,
                             onMicToggle: callOptions.toggleMic,
                             onCameraToggle: callOptions.toggleCamera,
-                            onEnd: ()=> callOptions.hangUp(disposeSignal, context)
+                            onEnd: () {
+                              callOptions.hangUp(disposeSignal, context);
+                            }
                           ),
                         ),
                       )

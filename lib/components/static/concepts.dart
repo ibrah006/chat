@@ -1,5 +1,6 @@
 
 
+import 'package:chat/services/call/call_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -695,4 +696,88 @@ class LoginConcept extends StatelessWidget {
       child: Icon(icon, color: Colors.white, size: 28),
     );
   }
+}
+
+class CallLogConcept extends StatelessWidget {
+  final CallState callState;
+  final String callType; // 'Incoming' or 'Outgoing'
+  final String callTime; // e.g., "2:15 PM"
+  final String duration; // e.g., "5 mins"
+
+  const CallLogConcept({
+    required this.callState,
+    required this.callType,
+    required this.callTime,
+    required this.duration
+  });
+
+  @override
+  Widget build(BuildContext context) {
+
+    final isMissed = callState == CallState.missed;
+
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            child: Icon(Icons.person, size: 27),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Name",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      isMissed
+                          ? Icons.call_missed_rounded
+                          : callState == CallState.incoming || callState == CallState.ongoing || callState == CallState.talking? Icons.call_rounded
+                          : Icons.call_end_rounded,
+                          // : (isIncomingCall ? Icons.call_received : Icons.call_made),
+                      color: isMissed ? Colors.red : Color(0xFF6C63FF),
+                      size: 16,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      "$callType Call",
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Text(
+            callState == CallState.incoming || callState == CallState.ongoing? "Waiting for you"
+            : callState == CallState.talking? 'Talking'
+            : isMissed ? 'Missed Call'
+            : "Duration: $duration",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.black54,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
