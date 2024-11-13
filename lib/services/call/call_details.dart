@@ -23,6 +23,8 @@ class CallDetails extends Person implements NotificationInfo {
 
   late DateTime datetime;
 
+  Duration? duration;
+
   static CallDetails fromUserInfo(Person userInfo, CallType? callType_, {bool? isCaller_, DateTime? timestamp, CallState? state_}) {
     return CallDetails(
       userInfo.uid!,
@@ -47,7 +49,8 @@ class CallDetails extends Person implements NotificationInfo {
       "callType": callType?.name,
       "displayName": displayName,
       "roomId": roomId,
-      "state": state?.name
+      "state": state?.name,
+      "duration": duration
     };
   }
 

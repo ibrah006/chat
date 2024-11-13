@@ -30,7 +30,7 @@ class SomeConcept extends StatelessWidget {
             // Welcome Title
             Text(
               'Welcome Back!',
-              style: TextStyle(
+              style:  GoogleFonts.poppins(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -42,7 +42,7 @@ class SomeConcept extends StatelessWidget {
             // Subtitle
             Text(
               "Let's explore what's new today",
-              style: TextStyle(
+              style:  GoogleFonts.poppins(
                 fontSize: 16,
                 color: Colors.black54,
               ),
@@ -91,9 +91,9 @@ class SomeConcept extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Log Out',
-                      style: TextStyle(
+                      style:  GoogleFonts.poppins(
                         fontSize: 16,
                         color: Colors.white,
                       ),
@@ -161,168 +161,6 @@ class SomeConcept extends StatelessWidget {
   }
 }
 
-
-class HomeConcept extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.topCenter,
-            radius: 6,
-            colors: [
-              Color(0xFFE3F2FD), // Light blue for gradient effect
-              Color(0xFFFFFFFF), // White for subtle transition
-            ],
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SafeArea(child: SizedBox(height: 20)),
-
-            // Welcome Title
-            Text(
-              'Chat',
-              style: GoogleFonts.poppins(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Subtitle
-            Text(
-              "Hi, \$USer",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 28),
-
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search chats...',
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 21),
-
-            // Chat List
-            Expanded(
-              child: ListView.builder(
-                itemCount: 10, // Example count, replace with dynamic count
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.grey[300],
-                            child: Icon(Icons.person, color: Colors.white),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Contact Name',
-                                  style: GoogleFonts.poppins(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Last message preview...',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '12:34 PM',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Icon(
-                                Icons.check_circle,
-                                size: 14,
-                                color: Colors.blue,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add new chat action
-        },
-        backgroundColor: Color(0xFFFF6B6B),
-        child: Icon(Icons.chat, color: Colors.white),
-      ),
-    );
-  }
-}
-
-
 class ChatConcept extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -343,8 +181,8 @@ class ChatConcept extends StatelessWidget {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Yusuf', style: TextStyle(color: Colors.black)),
-              Text('Online', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+              Text('Yusuf', style:  GoogleFonts.poppins(color: Colors.black)),
+              Text('Online', style:  GoogleFonts.poppins(color: Colors.grey.shade600, fontSize: 12)),
             ],
           ),
           actions: [
@@ -390,7 +228,7 @@ class ChatConcept extends StatelessWidget {
           children: [
             Text(text),
             SizedBox(height: 4),
-            Text(time, style: TextStyle(fontSize: 10, color: Colors.grey)),
+            Text(time, style:  GoogleFonts.poppins(fontSize: 10, color: Colors.grey)),
           ],
         ),
       ),
@@ -410,9 +248,9 @@ class ChatConcept extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(text, style: TextStyle(color: Colors.white)),
+            Text(text, style:  GoogleFonts.poppins(color: Colors.white)),
             SizedBox(height: 4),
-            Text(time, style: TextStyle(fontSize: 10, color: Colors.grey[300])),
+            Text(time, style:  GoogleFonts.poppins(fontSize: 10, color: Colors.grey[300])),
           ],
         ),
       ),
@@ -432,7 +270,7 @@ class ChatConcept extends StatelessWidget {
           SizedBox(height: 4),
           Text(
             'https://www.figma.com/file/chatappsdesign...',
-            style: TextStyle(color: Colors.blue),
+            style:  GoogleFonts.poppins(color: Colors.blue),
           ),
         ],
       ),
@@ -454,7 +292,7 @@ class ChatConcept extends StatelessWidget {
           Expanded(
             child: TextField(
               decoration: InputDecoration(
-                hintStyle: TextStyle(color: Colors.grey.shade400),
+                hintStyle:  GoogleFonts.poppins(color: Colors.grey.shade400),
                 hintText: 'Type Here...',
                 border: OutlineInputBorder(
                   borderSide: BorderSide.none,
@@ -472,156 +310,183 @@ class ChatConcept extends StatelessWidget {
   }
 }
 
-class HomeConceptTwo extends StatelessWidget {
+class ChatConcept2 extends StatelessWidget {
+  final String displayName;
+  final String profileImageUrl;
+  final bool isOnline;
+
+  const ChatConcept2({
+    Key? key,
+    required this.displayName,
+    required this.profileImageUrl,
+    this.isOnline = false,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: Color(0xFFF5F6FA),
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Text(
-            'Chats',
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,  // AppBar background color set to white
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(profileImageUrl),
+              radius: 18,
+              backgroundColor: Color(0xFF6C63FF).withOpacity(.35),
+              child: Icon(Icons.person, size: 27, color: Colors.black87)
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  isOnline ? 'Online' : 'Offline',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.call_rounded, color: Colors.black),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.videocam_rounded, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.all(16),
+              children: [
+                // Example Message Bubbles
+                _buildMessageBubble(
+                  message: "Hello, can you check my project?",
+                  isSentByUser: false,
+                  time: "12:23 PM",
+                ),
+                _buildMessageBubble(
+                  message: "Sure! Can you send the link?",
+                  isSentByUser: true,
+                  time: "12:33 PM",
+                ),
+                _buildMessageBubble(
+                  message: "Here's the link: https://example.com",
+                  isSentByUser: false,
+                  time: "12:35 PM",
+                  isLink: true,
+                ),
+                _buildMessageBubble(
+                  message: "Looks great! 👍",
+                  isSentByUser: true,
+                  time: "12:37 PM",
+                ),
+              ],
             ),
           ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.search, color: Colors.grey[700]),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert, color: Colors.grey[700]),
-              onPressed: () {},
-            ),
-          ],
-          centerTitle: true,
+          _buildMessageInput(),
+        ],
+      ),
+      backgroundColor: Colors.grey[100],  // Background color set to light grey
+    );
+  }
+
+  Widget _buildMessageBubble({
+    required String message,
+    required bool isSentByUser,
+    required String time,
+    bool isLink = false,
+  }) {
+    return Align(
+      alignment: isSentByUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 6),
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSentByUser ? Color(0xFF6C63FF) : Colors.white70,  // Sent bubble: #6C63FF, Received bubble: light grey
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+            bottomLeft: isSentByUser ? Radius.circular(12) : Radius.circular(0),
+            bottomRight: isSentByUser ? Radius.circular(0) : Radius.circular(12),
+          ),
         ),
-        body: ListView(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: isSentByUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            _buildChatTile(
-              avatarUrl: 'https://example.com/avatar1.jpg',
-              name: 'Adhitya Panth',
-              message: 'Can you check my project at once?',
-              time: '12:23 PM',
-              isOnline: true,
+            isLink
+                ? GestureDetector(
+                    onTap: () {
+                      // Open link
+                    },
+                    child: Text(
+                      message,
+                      style: TextStyle(color: Colors.blue[200], decoration: TextDecoration.underline),
+                    ),
+                  )
+                : Text(
+                    message,
+                    style: TextStyle(
+                      color: isSentByUser ? Colors.white : Colors.black87,
+                    ),
+                  ),
+            SizedBox(height: 5),
+            Text(
+              time,
+              style: TextStyle(fontSize: 10, color: isSentByUser ? Colors.white70 : Colors.grey[600]),
             ),
-            _buildChatTile(
-              avatarUrl: 'https://example.com/avatar2.jpg',
-              name: 'Sara Ali',
-              message: 'Sure! Let me send you the link.',
-              time: '11:45 AM',
-              isOnline: false,
-            ),
-            _buildChatTile(
-              avatarUrl: 'https://example.com/avatar3.jpg',
-              name: 'John Doe',
-              message: 'Looking forward to our meeting!',
-              time: 'Yesterday',
-              isOnline: true,
-            ),
-            // Add more _buildChatTile as needed
           ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: Color(0xFF6C63FF),
-          child: Icon(Icons.message, color: Colors.white),
-          onPressed: () {
-            // Action for starting a new chat
-          },
         ),
       ),
     );
   }
 
-  Widget _buildChatTile({
-    required String avatarUrl,
-    required String name,
-    required String message,
-    required String time,
-    required bool isOnline,
-  }) {
+  Widget _buildMessageInput() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 6.0),
-      padding: EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: Colors.white,  // Background color of message input area set to white
       child: Row(
         children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundImage: NetworkImage(avatarUrl),
-              ),
-              if (isOnline)
-                Positioned(
-                  bottom: 2,
-                  right: 2,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-            ],
+          IconButton(
+            icon: Icon(Icons.add, color: Color(0xFF6C63FF)),
+            onPressed: () {},
           ),
-          SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],  // Text field container color set to light grey
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Type a message...",
+                  border: InputBorder.none,
                 ),
-                SizedBox(height: 4),
-                Text(
-                  message,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                time,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
-              ),
-            ],
+          IconButton(
+            icon: Icon(Icons.camera_alt, color: Color(0xFF6C63FF)),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.send, color: Color(0xFF6C63FF)),
+            onPressed: () {},
           ),
         ],
       ),
@@ -646,7 +511,7 @@ class LoginConcept extends StatelessWidget {
                 // App Logo or Title
                 Text(
                   'Welcome Back!',
-                  style: TextStyle(
+                  style:  GoogleFonts.poppins(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
@@ -655,7 +520,7 @@ class LoginConcept extends StatelessWidget {
                 SizedBox(height: 6),
                 Text(
                   'Please log in to continue',
-                  style: TextStyle(
+                  style:  GoogleFonts.poppins(
                     fontSize: 16,
                     color: Colors.grey[600],
                   ),
@@ -685,7 +550,7 @@ class LoginConcept extends StatelessWidget {
                     },
                     child: Text(
                       'Forgot Password?',
-                      style: TextStyle(
+                      style:  GoogleFonts.poppins(
                         color: Color(0xFF6C63FF),
                         fontWeight: FontWeight.w500,
                       ),
@@ -710,7 +575,7 @@ class LoginConcept extends StatelessWidget {
                   ),
                   child: Text(
                     'Sign In',
-                    style: TextStyle(
+                    style:  GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -733,7 +598,7 @@ class LoginConcept extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text(
                         'or',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style:  GoogleFonts.poppins(color: Colors.grey[600]),
                       ),
                     ),
                     Expanded(
@@ -776,7 +641,7 @@ class LoginConcept extends StatelessWidget {
                   children: [
                     Text(
                       "Don't have an account?",
-                      style: TextStyle(color: Colors.grey[700]),
+                      style:  GoogleFonts.poppins(color: Colors.grey[700]),
                     ),
                     TextButton(
                       onPressed: () {
@@ -784,7 +649,7 @@ class LoginConcept extends StatelessWidget {
                       },
                       child: Text(
                         'Sign Up',
-                        style: TextStyle(
+                        style:  GoogleFonts.poppins(
                           color: Color(0xFF6C63FF),
                           fontWeight: FontWeight.w500,
                         ),

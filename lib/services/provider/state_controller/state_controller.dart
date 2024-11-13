@@ -21,6 +21,23 @@ class FriendsController<T> extends GetxController {
   // Inject ApiService using GetX's dependency injection
   final FriendsManager apiService = Get.find();
 
+  reArrange(userUid) {
+
+    if (userUid == data.first.uid) {
+      return;
+    }
+
+    data.sort((a, b) {
+      if (b.lastMessage == null) {
+        return 0;
+      } else if (a.lastMessage == null) {
+        return 1;
+      }
+
+      return b.lastMessage!.datetime.compareTo(a.lastMessage!.datetime);
+    });
+  }
+
   updateLastMessage(Message lastMessage) {
     int friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
     if (friendIndex == -1) {
@@ -29,6 +46,9 @@ class FriendsController<T> extends GetxController {
     }
 
     data[friendIndex].lastMessage = lastMessage;
+
+    reArrange(lastMessage.details.uid);
+
     update();
   }
 

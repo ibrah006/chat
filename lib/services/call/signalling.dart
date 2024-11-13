@@ -41,7 +41,7 @@ class Signaling {
 
     registerPeerConnectionListeners();
 
-    localStream?.getTracks().forEach((track) {
+    localStream!.getTracks().forEach((track) {
       peerConnection?.addTrack(track, localStream!);
     });
 
@@ -229,7 +229,7 @@ class Signaling {
     RTCVideoRenderer remoteVideo,
   ) async {
     var stream = await navigator.mediaDevices
-        .getUserMedia({'video': true, 'audio': false});
+        .getUserMedia({'video': true, 'audio': true});
 
     localVideo.srcObject = stream;
     localStream = stream;

@@ -399,7 +399,7 @@ class CallScreen extends MainWrapperStateful {
       info: NotificationInfo(
         notiTitle, notiBody, callMessage.details.fcmToken, type: NotificationType.call
       ),
-      message: callMessage
+      message: callMessage.clnoeWith(details: copyOfCallDetailsForCurrentUser)
     );
   }
 

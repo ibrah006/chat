@@ -1,5 +1,6 @@
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:chat/components/minimal_tile.dart';
 import 'package:chat/components/static/concepts.dart';
 import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
@@ -19,8 +20,6 @@ import 'package:chat/services/messages/message.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
-
-import '../extensions.dart';
 
 class HomeScreen extends MainWrapperStateful {
 
@@ -96,311 +95,192 @@ class HomeScreen extends MainWrapperStateful {
 
   @override
   Widget build(BuildContext context) {
- 
-
-    return true? Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.topCenter,
-            radius: 6,
-            colors: [
-              Color(0xFFE3F2FD), // Light blue for gradient effect
-              Color(0xFFFFFFFF), // White for subtle transition
-            ],
+    return  Scaffold(
+      backgroundColor: Color(0xFFF5F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Chats',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 32.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SafeArea(child: SizedBox(height: 20)),
-
-            // Welcome Title
-            Text(
-              'Chat',
-              style: GoogleFonts.poppins(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            // Subtitle
-            Text(
-              "Hi, ${auth.currentUser!.displayName?.split("%20%")[0].toCapitalized?? auth.currentUser!.email}",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.black54,
-              ),
-            ),
-            const SizedBox(height: 28),
-
-            // Search Bar
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search chats...',
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.search, color: Colors.grey),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 21),
-
-            // Chat List
-            Expanded(
-              child: GetBuilder<FriendsController>(
-                builder: (context) {
-                  final friends = friendsController.data;
-                  return ListView.builder(
-                    itemCount: friends.length, // Example count, replace with dynamic count
-                    itemBuilder: (context, index) {
-                                  
-                      final Person friend = friends[index];
-                      final String userFcmToken = friend.fcmToken;
-                      final bool showFcmWarning = userFcmToken.isEmpty;
-                              
-                      print("friend: ${friend.toMap()}");
-                  
-                      final lastMessage = friend.lastMessage;
-
-                      if (showFcmWarning) {
-                        refreshFcmToken(friend.email!).then((value) {
-                          setState(() {});
-                        });
-                      }
-                                  
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: InkWell(
-                          onTap: () {
-                            Get.toNamed("/chat", arguments: friend);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 10,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: Colors.grey[200],
-                                  child: Icon(Icons.person, color: Colors.grey[400]),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                            "${friend.displayName!}${friend.uid == auth.currentUser!.uid? " (You)" : ""}",
-                                            style: GoogleFonts.poppins(
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 16,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          if (showFcmWarning) ...[
-                                            SizedBox(width: 13),
-                                            Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold)),
-                                            Icon(Icons.warning_rounded, color: Colors.red.shade400)
-                                          ]
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        lastMessage!=null? "${lastMessage.isSender? "You: " : ""}${lastMessage.text}" : "Click here to start messaging",
-                                        style: GoogleFonts.poppins(
-                                          fontSize: 13,
-                                          color: Colors.grey,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                if (friend.lastMessage?.isRead == false) Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      DateFormat("hh:mm a").format(lastMessage!.datetime),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      // padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red.shade400,//Color(0xFFFF6B6B),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Padding(padding: EdgeInsets.only(top: 4), child: SizedBox())
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                }
-              ),
-            ),
-          ],
-        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.grey[700]),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: Colors.grey[700]),
+            onPressed: () {},
+          ),
+        ],
+        centerTitle: true,
+      ),
+      body: GetBuilder<FriendsController>(
+        builder: (context) {
+          final friends = friendsController.data;
+          return ListView(
+            padding: const EdgeInsets.symmetric(vertical: 12.5),
+            children: List.generate(
+              friendsController.data.length,
+              (index) {
+                final Person friend = friends[index];
+          
+                return _buildChatTile(
+                  friend
+                );
+              }
+            )
+          );
+        }
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Color(0xFF6C63FF),
+        child: Icon(Icons.message, color: Colors.white),
         onPressed: () async {
           // Add new chat action
           Get.toNamed('/search');
           setState(() {});
         },
-        backgroundColor: Color(0xFFFF6B6B),
-        child: Icon(Icons.chat, color: Colors.white),
-      ),
-    ) : Scaffold(
-      backgroundColor: Colors.white,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(130), // Adjust the height as needed
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SafeArea(child: SizedBox()),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Chats',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF247ff1),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.notifications_none, color: Colors.black87),
-                        onPressed: () {
-                          // Notification action
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(Icons.account_circle, color: Colors.black87, size: 30),
-                        onPressed: () {
-                          // Profile action
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10), // Space between title and search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.03),
-                      blurRadius: 23.5,
-                      offset: Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search chats...',
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                    border: InputBorder.none,
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Icon(Icons.search, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-      
-          // "Recent Chats" section
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Recent Chats',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 7),
-               
-              ],
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.toNamed("/search");
-        },
-        backgroundColor: Color(0xFFFF6B6B),
-        child: Icon(Icons.chat_bubble_outline, color: Colors.white),
       ),
     );
-  } 
+  }
+
+  void toChatScreenCallback(Person user) async {
+    await Get.toNamed("/chat", arguments: user);
+    setState(() {});
+  }
+
+  Widget _buildChatTile(Person user) {
+
+    final bool showFcmWarning = user.fcmToken.isEmpty;
+
+    if (showFcmWarning) {
+      refreshFcmToken(user.email!).then((value) {
+        setState(() {});
+      });
+    }
+
+    return MinimalTile(user, profileImageUrl: "", chatScreenCallBack: toChatScreenCallback);
+
+    // return GestureDetector(
+    //   onTap: ()=> toChatScreenCallback(user),
+    //   child: Container(
+    //     margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    //     padding: EdgeInsets.all(12.0),
+    //     decoration: BoxDecoration(
+    //       color: Colors.white,
+    //       borderRadius: BorderRadius.circular(16.0),
+    //       boxShadow: [
+    //         BoxShadow(
+    //           color: Colors.grey.withOpacity(0.15),
+    //           spreadRadius: 2,
+    //           blurRadius: 8,
+    //           offset: Offset(0, 4),
+    //         ),
+    //       ],
+    //     ),
+    //     child: Row(
+    //       children: [
+    //         Stack(
+    //           children: [
+    //             CircleAvatar(
+    //               radius: 28,
+    //               // backgroundImage: NetworkImage(avatarUrl),
+    //             ),
+    //             if (isOnline)
+    //               Positioned(
+    //                 bottom: 2,
+    //                 right: 2,
+    //                 child: Container(
+    //                   width: 12,
+    //                   height: 12,
+    //                   decoration: BoxDecoration(
+    //                     color: Colors.green,
+    //                     shape: BoxShape.circle,
+    //                     border: Border.all(color: Colors.white, width: 2),
+    //                   ),
+    //                 ),
+    //               ),
+    //           ],
+    //         ),
+    //         SizedBox(width: 12),
+    //         Expanded(
+    //           child: Column(
+    //             crossAxisAlignment: CrossAxisAlignment.start,
+    //             children: [
+    //               Row(
+    //                 children: [
+    //                   Text(
+    //                     name,
+    //                     style: TextStyle(
+    //                       fontSize: 16,
+    //                       fontWeight: FontWeight.w600,
+    //                       color: Colors.black87,
+    //                     ),
+    //                   ),
+    //                   if (showFcmWarning) ...[
+    //                     SizedBox(width: 13),
+    //                     Text("FCM TOKEN", style: textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, fontSize: 12.75)),
+    //                     Icon(Icons.warning_rounded, color: Colors.red.shade400)
+    //                   ]
+    //                 ],
+    //               ),
+    //               SizedBox(height: 4),
+    //               Text(
+    //                 lastMessage!=null? "${lastMessage.isSender? "You: " : ""}${lastMessage.text}" : "Click here to start messaging",
+    //                 maxLines: 1,
+    //                 overflow: TextOverflow.ellipsis,
+    //                 style: TextStyle(
+    //                   fontSize: 14,
+    //                   color: Colors.grey[600],
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //         Column(
+    //           mainAxisAlignment: MainAxisAlignment.center,
+    //           children: [
+    //             if (time!=null) Text(
+    //               time,
+    //               style: TextStyle(
+    //                 fontSize: 12,
+    //                 color: Colors.grey[500],
+    //               ),
+    //             ),
+    //             if (user.lastMessage?.isRead == false) Column(
+    //               crossAxisAlignment: CrossAxisAlignment.end,
+    //               children: [
+    //                 Text(
+    //                   DateFormat("hh:mm a").format(lastMessage.datetime),
+    //                   style: GoogleFonts.poppins(
+    //                     fontSize: 12,
+    //                     color: Colors.grey,
+    //                   ),
+    //                 ),
+    //                 const SizedBox(height: 4),
+    //                 Container(
+    //                   // padding: const EdgeInsets.all(4),
+    //                   decoration: BoxDecoration(
+    //                     color: Colors.red.shade400,//Color(0xFFFF6B6B),
+    //                     borderRadius: BorderRadius.circular(8),
+    //                   ),
+    //                   child: Padding(padding: EdgeInsets.only(top: 4), child: SizedBox())
+    //                 ),
+    //               ],
+    //             ),
+    //           ],
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
+  }
 
   void logout() async {
     await auth.signOut();

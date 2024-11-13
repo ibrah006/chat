@@ -38,6 +38,12 @@ class Message {
   @deprecated
   CallDetails? callDetails;
 
+  Message clnoeWith({CallDetails? details}) {
+    final copy = this;
+    if (details!=null) copy.details = details;
+    return copy;  
+  }
+
   /// change the parameter if video call
   static Message call(CallDetails callDetails_, {required String fromUserUid_}) {
     if (callDetails_.type == NotificationType.message) throw "Notification type cannot be .message when calling";
