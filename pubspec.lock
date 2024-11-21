@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: ddc6f775260b89176d329dee26f88b9469ef46aa3228ff6a0b91caf2b2989692
+      sha256: "71c01c1998c40b3af1944ad0a5f374b4e6fef7f3d2df487f3970dbeadaeb25a1"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.42"
+    version: "1.3.46"
   analyzer:
     dependency: transitive
     description:
@@ -369,6 +369,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  ffmpeg_kit_flutter:
+    dependency: "direct main"
+    description:
+      name: ffmpeg_kit_flutter
+      sha256: "843aae41823ca94a0988d975b4b6cdc6948744b9b7e2707d81a3a9cd237b0100"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.3"
+  ffmpeg_kit_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: ffmpeg_kit_flutter_platform_interface
+      sha256: addf046ae44e190ad0101b2fde2ad909a3cd08a2a109f6106d2f7048b7abedee
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   file:
     dependency: transitive
     description:
@@ -413,26 +429,26 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: "40921de9795fbf5887ed5c0adfdf4972d5a8d7ae7e1b2bb98dea39bc02626a88"
+      sha256: "2438a75ad803e818ad3bd5df49137ee619c46b6fc7101f4dbc23da07305ce553"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.8.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: f7d7180c7f99babd4b4c517754d41a09a4943a0f7a69b65c894ca5c68ba66315
+      sha256: e30da58198a6d4b49d5bce4e852f985c32cb10db329ebef9473db2b9f09ce810
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.1"
+    version: "5.3.0"
   firebase_core_web:
     dependency: transitive
     description:
       name: firebase_core_web
-      sha256: f4ee170441ca141c5f9ee5ad8737daba3ee9c8e7efb6902aee90b4fbd178ce25
+      sha256: f967a7138f5d2ffb1ce15950e2a382924239eaa521150a8f144af34e68b3b3e5
       url: "https://pub.dev"
     source: hosted
-    version: "2.18.0"
+    version: "2.18.1"
   firebase_dart:
     dependency: transitive
     description:
@@ -465,6 +481,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.9.0"
+  firebase_storage:
+    dependency: "direct main"
+    description:
+      name: firebase_storage
+      sha256: def84a1cb27e725b9d53337b0e3d0066c7f1e429f70b7c6d6e0612f49361f347
+      url: "https://pub.dev"
+    source: hosted
+    version: "12.3.6"
+  firebase_storage_platform_interface:
+    dependency: transitive
+    description:
+      name: firebase_storage_platform_interface
+      sha256: "1108af14afa04e1fd070d42a0bec4d2e0feafced303b2b62513481c8890edce2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.33"
+  firebase_storage_web:
+    dependency: transitive
+    description:
+      name: firebase_storage_web
+      sha256: e99aa6f46c0a6e418012cc05abef045465f4845052b02730f6675c81dabfe270
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.10.5"
   firebaseapis:
     dependency: transitive
     description:
@@ -526,6 +566,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  flutter_sound:
+    dependency: "direct main"
+    description:
+      name: flutter_sound
+      sha256: f6e8694d86d39b52f34ff4317a941f5caba9a96a85564a015ebfd16191aad0b1
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.17.0"
+  flutter_sound_platform_interface:
+    dependency: "direct main"
+    description:
+      name: flutter_sound_platform_interface
+      sha256: "8a11edfd753c89f63c0f956f783ca5101c17214f3a6a8ee801ef0061e3983b30"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.17.0"
+  flutter_sound_web:
+    dependency: transitive
+    description:
+      name: flutter_sound_web
+      sha256: "9532dbc2460abcc09dad9d62ca06cbdb4161ddaa079d1f22b7bdedb7d4fb5816"
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.17.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -720,6 +784,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: be4b23575aac7ebf01f225a241eb7f6b5641eeaf43c6a8613510fc2f8cf187d1
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.5.0"
   logging:
     dependency: transitive
     description:

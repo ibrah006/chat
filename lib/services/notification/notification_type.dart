@@ -1,3 +1,3 @@
 enum NotificationType {
-  call, message, videoCall
+  call, message, videoCall, voiceMessage
 }

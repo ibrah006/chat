@@ -1,12 +1,16 @@
 
 
 
+import 'package:chat/components/bubbles/bubble.dart';
 import 'package:chat/components/bubbles/callBubble.dart';
+import 'package:chat/components/static/voice_note_recorder.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
+import 'package:chat/services/messages/voice_message.dart';
 import 'package:chat/services/notification/notification_type.dart';
 import 'package:chat/services/notification/send_notification.dart';
+import 'package:chat/services/provider/provider_managers.dart';
 import 'package:chat/services/provider/state_controller/state_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/widget_main.dart';
@@ -14,6 +18,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 class ChatScreen extends MainWrapperStateful {
@@ -36,8 +42,27 @@ class ChatScreen extends MainWrapperStateful {
 
   bool get isYourself => person.uid == _auth.currentUser!.uid;
 
+  bool canVoice = true;
+  @Deprecated("This is replaced by [RecordingState]")
+  bool isRecordingVoice = false;
+
+  bool isRecordingStateNone() {
+    return voiceMessage.recordingState == RecordingState.none;
+  }
+
+  bool isRecording() {
+    return voiceMessage.recordingState == RecordingState.recording;
+  }
+
+  bool isRecordingPaused() {
+    return voiceMessage.recordingState == RecordingState.paused;
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    print(voiceMessage.recordingState);
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -131,123 +156,183 @@ class ChatScreen extends MainWrapperStateful {
 
   Widget _buildMessageBubble(Message message) {
 
-    bool isLink = false;
-
-    final time = DateFormat("hh:mm a").format(message.datetime);
-
     final isSender = message.isSender;
 
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 6),
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSender ? Color(0xFF6C63FF) : Colors.white70,  // Sent bubble: #6C63FF, Received bubble: light grey
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-            bottomLeft: isSender ? Radius.circular(12) : Radius.circular(0),
-            bottomRight: isSender ? Radius.circular(0) : Radius.circular(12),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: isSender ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            isLink
-                ? GestureDetector(
-                    onTap: () {
-                      // Open link
-                    },
-                    child: Text(
-                      message.text,
-                      style: TextStyle(color: Colors.blue[200], decoration: TextDecoration.underline),
-                    ),
-                  )
-                : Text(
-                    message.text,
-                    style: TextStyle(
-                      color: isSender ? Colors.white : Colors.black87,
-                    ),
-                  ),
-            SizedBox(height: 5),
-            Text(
-              time,
-              style: TextStyle(fontSize: 10, color: isSender ? Colors.white70 : Colors.grey[600]),
-            ),
-          ],
-        ),
-      ),
+      child: Bubble(message),
     );
   }
 
   Widget _buildMessageInput() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Colors.white,  // Background color of message input area set to white
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.add, color: Color(0xFF6C63FF)),
-            onPressed: () {},
-          ),
-          Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],  // Text field container color set to light grey
-                borderRadius: BorderRadius.circular(30),
+    return StreamBuilder(
+      stream: voiceMessage.stateManager.stream,
+      builder: (context, snapshot) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          color: Colors.white,  // Background color of message input area set to white
+          child: Row(
+            children: [
+              if (isRecordingStateNone()) IconButton(
+                icon: Icon(Icons.add, color: Color(0xFF6C63FF)),
+                onPressed: () {},
               ),
-              child: TextField(
-                controller: messageController,
-                decoration: InputDecoration(
-                  hintText: "Type a message...",
-                  border: InputBorder.none,
+              Expanded(
+                child: !isRecordingStateNone()? VoiceNoteRecorder(
+                  voiceMessage,
+                  onPauseStopRecording: onPauseVoiceNote,
+                  recordingState: voiceMessage.recordingState,
+                  ) : Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],  // Text field container color set to light grey
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextField(
+                    controller: messageController,
+                    onChanged: (value) {
+                      if (value.trim().isEmpty && !canVoice) {
+                        setState(() {
+                          canVoice = true;
+                        });
+                      } else if (value.trim().isNotEmpty && canVoice) {
+                        setState(() {
+                          canVoice = false;
+                        });
+                      }
+                    },
+                    decoration: InputDecoration(
+                      hintText: "Type a message...",
+                      border: InputBorder.none,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              // if (!isRecordingVoice) IconButton(
+              //   icon: Icon(Icons.camera_alt, color: Color(0xFF6C63FF)),
+              //   onPressed: () {},
+              // ),
+              IconButton(
+                icon: Icon(!canVoice || !isRecordingStateNone()? Icons.send : Icons.mic_rounded , color: Color(0xFF6C63FF)),
+                onPressed: !canVoice || !isRecordingStateNone()? sendFCMMessage : recordVoice,
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.camera_alt, color: Color(0xFF6C63FF)),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.send, color: Color(0xFF6C63FF)),
-            onPressed: sendFCMMessage,
-          ),
-        ],
-      ),
+        );
+      }
     );
+  }
+
+  final VoiceMessage voiceMessage = VoiceMessage();
+
+  void recordVoice() async {
+    await voiceMessage.start();
+
+    setState(() {
+      // isRecordingVoice = true;
+      voiceMessage.recordingState = RecordingState.recording;
+    });
+  }
+
+  void onPauseVoiceNote() async {
+    setState(() {
+      voiceMessage.recordingState = RecordingState.paused;
+    });
+
+    await voiceMessage.pause();
+  }
+
+  void onStopVoiceNote() async {
+    setState(() {
+      // isRecordingVoice = false;
+      voiceMessage.recordingState = RecordingState.none;
+    });
+
+    await voiceMessage.stop();
+  }
+  
+
+  Future<void> _sendNoti(final Message messageOriginal) async {
+
+    final notiTitle = messageOriginal.details.displayName!;
+    final notiBody = messageOriginal.text;
+
+    final message = Message.fromMap(messageOriginal.toMap());//messageOriginal.clnoeWith(details: CallDetails.fromUserInfo(Person.fromFirebaseAuth(_auth), null), map: messageOriginal.toMap());
+    message.details =  CallDetails.fromUserInfo(Person.fromFirebaseAuth(_auth), null);
+
+    print("message data from _sendNoti: ${message.toMap()}");
+
+    if (person.uid != _auth.currentUser!.uid) {
+      // can't pass in message.details.fcmToken instead of person.fcmToken as the former holds the value(fcm token) of the current user in all scenarios
+      try {
+        await SendPushNotification().sendNotification(
+          info: NotificationInfo(
+            notiTitle, notiBody, person.fcmToken, type: NotificationType.message, email: person.email
+          ),
+          message: message
+        );
+      } catch(e) {
+        print(e);
+
+        // TODO manually set up and caught error. HANDLE THIS
+      }
+    } else {
+      // still make sure the data is saved to the local database
+    }
   }
 
   Future<void> sendFCMMessage() async {
 
-    if (messageController.text.trim().isEmpty) {
-      return;
-    }
+    late final Message message;
 
-    final Message message = Message(
-      Uuid().v1(),
-      messageController.text,
-      CallDetails.fromUserInfo(Person.fromFirebaseAuth(_auth), null),
-      fromUserUid: _auth.currentUser!.uid);
+    if (!isRecordingStateNone()) {
+      onStopVoiceNote();
+      // final path = voiceMessage.recordingPath;
 
-    final notiTitle = _auth.currentUser!.displayName!;
-    final notiBody = message.text;
+      print("voice note path: ${voiceMessage.recordingPath}");
 
-    if (person.uid != _auth.currentUser!.uid) {
-      // can't pass in message.details.fcmToken instead of person.fcmToken as the former holds the value(fcm token) of the current user in all scenarios
-      await SendPushNotification().sendNotification(
-        info: NotificationInfo(
-          notiTitle, notiBody, person.fcmToken, type: NotificationType.message
-        ),
-        message: message
-      );
+      final messageId = voiceMessage.getMessageId();
+
+      print("this is the voice message id: $messageId");
+
+      message = AudioMessage(
+          messageId,
+          CallDetails.fromUserInfo(person, null),
+          fromUserUid: _auth.currentUser!.uid,
+          downloadUrl: null,
+          path: voiceMessage.recordingPath!,
+          duration: voiceMessage.getDuration(),
+          isSending: true);
+
+      voiceMessage.send().then((value) async {
+        await _sendNoti(message).then((value) {
+          print("notification(message) sent successfully");
+          // this setss the message isSending status = false which will be used in the ui to show whether or the message is sending or is sent.
+          // messagesController.updateMessageSendingStatus(messageId);
+          message.isSending = false;
+          setState(() {});
+        });
+      });
+
     } else {
-      // still make sure the data is saved to the local database
-    }
+      
+      // make sure text field is not empty before proceeding
+      if (messageController.text.trim().isEmpty) {
+        return;
+      }
 
-    message.details = CallDetails.fromUserInfo(person, null);
+      message = Message(
+        Uuid().v1(),
+        messageController.text,
+        CallDetails.fromUserInfo(person, null),
+        fromUserUid: _auth.currentUser!.uid,
+        isSending: true);     
+
+      _sendNoti(message).then((value) {
+        message.isSending = false;
+        setState(() {});
+      });
+    }
     // message that was just sent is obv read by the current user
     message.isRead = true;
     setState(() {
@@ -255,6 +340,12 @@ class ChatScreen extends MainWrapperStateful {
     });
 
     friendsController.updateLastMessage(message);
+
+    // much needed to udpate the state
+    setState(() {
+      messageController.clear();
+      canVoice = true;
+    });
   }
 
   void startCall() async {
@@ -283,13 +374,31 @@ class ChatScreen extends MainWrapperStateful {
     // TODO: implement initState
     super.initState();
 
+    Permission.storage.request().then((granted){
+      print("is Storage permission granted: $granted");
+    });
+
+    voiceMessage.init();
+
     person = Get.arguments;
 
     print("we are ion the init of chta screen");
+
+    SendPushNotification.getUpdatedFcmToken(person.uid, person.email).then((String? newFcmToken) {
+      if (newFcmToken != null) {
+        // set the fcm token for user locally
+        friendsController.updateFcmToken(email: person.email, updatedFcmToken: newFcmToken);
+      }
+    });
 
     if (person.lastMessage?.isRead == false) {
       person.lastMessage?.isRead = true;
     }
   }
 
+  @override
+  void dispose() {
+    voiceMessage.dispose();
+    super.dispose();
+  }
 }

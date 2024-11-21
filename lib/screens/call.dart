@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:chat/constants/date.dart';
 import 'package:chat/services/provider/state_controller/state_controller.dart';
@@ -128,16 +129,15 @@ class CallScreen extends MainWrapperStateful {
   
 
   disposeSignal() async {
+    callMessage.details.duration = callTime.elapsed;
+    messagesController.onCallEnd(callMessage);
+
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
 
     // call duration set
     // callMessage.details.state = CallState.ended;
 
-    //TODO: buggy
-    callMessage.details.duration = callTime.elapsed;
-    messagesController.onCallEnd(callMessage);
-    
     try {
       signaling.hangUp(_localRenderer, caller: roomOwner);   
     } catch(e) {
@@ -312,83 +312,6 @@ class CallScreen extends MainWrapperStateful {
               ],
             ),
           );
-      
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: List.generate(
-                    4,
-                    (index) {
-                      return ElevatedButton(
-                        onPressed: () {
-                          switch(index) {
-                            // case 0: autoManageCallState();
-                            // case 1: autoManageCallState();
-                            case 2: callOptions.hangUp(disposeSignal, context);;
-                            // case 3: sendFCMMessage();
-                          }
-                        },
-                        style: index==2? const ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(Colors.red)
-                        ) : null,
-                        child: Text(["join room", "create room", "end call", "Send notification"][index])
-                      );
-                    }
-                  )
-                ),
-              ),
-              ListTile(
-                leading: Container(
-                  color: Colors.yellow,
-                  height: 20,
-                  width: 20,
-                ),
-                trailing: Text("current user"),
-              ),
-          
-              Row(
-                children: List.generate(
-                  2, (index) {
-                    return Expanded(
-                      child: SizedBox(
-                          height: 300,
-                          child: Container(
-                              decoration: BoxDecoration(
-                                border: index==0? Border.all(
-                                  color: Colors.yellow,
-                                  width: 4
-                                ) : null
-                              ),
-                              child: RTCVideoView([_localRenderer, _remoteRenderer][index])
-                          )
-                      ),
-                    );
-                  }
-                )
-              ),
-          
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Row(
-                  children: [
-                    Expanded(child: TextField(
-                      controller: roomController,
-                    )),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        //copy room id
-                      },
-                      label: Text("Copy"),
-                      icon: Icon(Icons.copy),
-                    )
-                  ],
-                ),
-              )
-            ],
-          );
         }
       )
     );
@@ -409,7 +332,7 @@ class CallScreen extends MainWrapperStateful {
 
     await SendPushNotification().sendNotification(
       info: NotificationInfo(
-        notiTitle, notiBody, callMessage.details.fcmToken, type: NotificationType.call
+        notiTitle, notiBody, callMessage.details.fcmToken, type: NotificationType.call, email: callMessage.details.email
       ),
       message: callMessage.clnoeWith(details: copyOfCallDetailsForCurrentUser)
     );
@@ -440,5 +363,135 @@ class CallScreen extends MainWrapperStateful {
     }
     
     setState(() {});
+  }
+}
+
+class CallOptionsConcept extends StatelessWidget {
+  final VoidCallback onMute;
+  final VoidCallback onSpeaker;
+  final VoidCallback onVideo;
+  final VoidCallback onEndCall;
+
+  const CallOptionsConcept({
+    Key? key,
+    required this.onMute,
+    required this.onSpeaker,
+    required this.onVideo,
+    required this.onEndCall,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          CallActionButton(
+            icon: Icons.mic_off,
+            label: 'Mute',
+            color: Colors.black54,
+            onPressed: onMute,
+          ),
+          CallActionButton(
+            icon: Icons.volume_up,
+            label: 'Speaker',
+            color: Colors.black54,
+            onPressed: onSpeaker,
+          ),
+          CallActionButton(
+            icon: Icons.videocam,
+            label: 'Video',
+            color: Colors.black54,
+            onPressed: onVideo,
+          ),
+          CallActionButton(
+            icon: Icons.call_end,
+            label: 'End',
+            color: Colors.red,
+            onPressed: onEndCall,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CallActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const CallActionButton({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IconButton(
+          icon: Icon(icon, color: color),
+          iconSize: 36,
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Colors.black54,
+          ),
+        ),
+      ],
+    );
+  }
+}class ContactInfo extends StatelessWidget {
+  final String contactName;
+  final String callDuration;
+  final String callStatus;
+
+  const ContactInfo({
+    Key? key,
+    required this.contactName,
+    required this.callDuration,
+    required this.callStatus,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          contactName,
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          callDuration,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          callStatus,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
   }
 }

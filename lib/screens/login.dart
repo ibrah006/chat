@@ -2,7 +2,9 @@
 
 import 'package:chat/components/static/login_main.dart';
 import 'package:chat/components/static/set_display_name.dart';
+import 'package:chat/constants/dialogs.dart';
 import 'package:chat/widget_main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -70,269 +72,65 @@ class LoginScreen extends MainWrapperStateful {
     }
   }
 
-  Future<void> updateDisplayName(String? displayNameInputted) async {
-    String? displayName = displayNameInputted;
+  Future<void> updateDisplayName(String? newDisplayName) async {
+    final authname = auth.currentUser!.displayName?.split("%20%");
+    final isAuthnameNotEmpty = (authname?.length?? 0) > 1;
 
-    try {
-      displayName = displayName==null? displayNameController.text : (displayName.isEmpty? auth.currentUser!.displayName!.split("%20%")[0] : displayName);
-    } catch (e) {
-      // expected error cause: displayName == null when hit "continue" when promted
-      // TODO: show feedback
-    }
+    final String? displayNameAuth = isAuthnameNotEmpty? authname![0] : null;
 
-    debugPrint("display name from over here: $displayName");
+    debugPrint("display name from over here: $displayNameAuth");
 
-    if (displayName!.isNotEmpty) {
+    if (newDisplayName != null && newDisplayName.isNotEmpty) {
+      // IF UPDATE IN DISPLAY NAME
 
-      final authname = auth.currentUser!.displayName;
+      try {
+        await auth.currentUser!.updateDisplayName("$newDisplayName%20%$currentDeviceFcmToken");
 
-      if ((authname?.split('').length?? 0 ) < 2) {
+        Navigator.popAndPushNamed(context, "/");
+      } catch(e) {
+        return;
+      }
+    } else if (displayNameAuth != null) {
+      // if the user has a CHANGE IN FCM TOKEN
+
+      final fcmTokenAuth = authname![1];
+
+      if (fcmTokenAuth != currentDeviceFcmToken) {
+        print("Change in fcm token / display name for user of this email... updating...");
+
         try {
-          await auth.currentUser!.updateDisplayName("$displayName%20%$currentDeviceFcmToken");
+          await auth.currentUser!.updateDisplayName("$displayNameAuth%20%$currentDeviceFcmToken");
+          final userUpdatesPath = FirebaseFirestore.instance.collection("updates").doc(auth.currentUser!.uid);
+          if ((await userUpdatesPath.get()).exists) {
+            await userUpdatesPath.delete();
+          }
+          await userUpdatesPath.set({
+            "fcmToken": currentDeviceFcmToken
+          });
+
+          print("FCM Token / Display Name updated.");
+          Navigator.popAndPushNamed(context, "/");
         } catch(e) {
           return;
         }
-      } else {
-
-        final displayNameAuth = authname?.split("%20%")[0];
-        final fcmTokenAuth = authname?.split("%20%")[1];
-
-        if (fcmTokenAuth != currentDeviceFcmToken || displayNameAuth != displayName) {
-          print("Change in fcm token / display name for user of this email... updating...");
-          try {
-            await auth.currentUser!.updateDisplayName("$displayName%20%$currentDeviceFcmToken");
-          } catch(e) {
-            return;
-          }
-          print("FCM Token / Display Name updated.");
-        }
       }
-
-      Navigator.popAndPushNamed(context, "/");
     } else {
-      // TODO: error feedback to user 'Please type in your display name'
+      // show feedback to user
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please type in a display name to set'),
+        ),
+      );
     }
   }
 
-  late final Size screenSize;
-
-  @override
-  Widget build(BuildContext context) {
-
-    try {
-      screenSize = MediaQuery.of(context).size;
-    } catch(e) {}
-
-    return showDisplayNameInput? SetDisplayNameScreen(updateDisplayName) : Scaffold(
-    
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment.topCenter,
-                radius: 6,
-                colors: [
-                  Color(0xFFE3F2FD), // Light blue for gradient effect
-                  Color(0xFFFFFFFF), // White for subtle transition
-                ],
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      isLogin? 'Hello Again!' : "Hello, Welcome!",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      isLogin? "Welcome back, you've been missed!" : "Welcome to chat! All your chats in one place.",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 42),
-                    Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.03), // Shadow color
-                            blurRadius: 23.5,         // Spread of the shadow
-                            offset: Offset(0, 4),  // Position of the shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        controller: emailController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter email',
-                          hintStyle: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                          contentPadding: EdgeInsets.all(17),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          // fillColor: Colors.grey[100],
-                          fillColor: Colors.white
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.03), // Shadow color
-                            blurRadius: 23.5,        // Spread of the shadow
-                            offset: Offset(0, 4),  // Position of the shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        controller: passController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                          contentPadding: EdgeInsets.all(17),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          // fillColor: Colors.grey[100],
-                          fillColor: Colors.white,
-                          suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.grey.shade400, size: 19),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    isLogin? SizedBox() : Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(.03), // Shadow color
-                            blurRadius: 23.5,        // Spread of the shadow
-                            offset: Offset(0, 4),  // Position of the shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: TextField(
-                        controller: confirmPassController,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          hintText: 'Confirm password',
-                          hintStyle: GoogleFonts.poppins(
-                            color: Colors.grey,
-                            fontSize: 14,
-                          ),
-                          contentPadding: EdgeInsets.all(17),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          // fillColor: Colors.grey[100],
-                          fillColor: Colors.white,
-                          suffixIcon: Icon(Icons.visibility_off_outlined, color: Colors.grey.shade400, size: 19),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    isLogin? Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Recovery Password',
-                          style: TextStyle(
-                            color: Color(0xFF247ff1),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ) : SizedBox(),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: authenticate,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFF6B6B), // Light red color as per the design
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        isLogin? 'Sign In' : "Resgister",
-                        style: TextStyle(fontSize: 16, color: Colors.white),
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    // Row(
-                    //   children: [
-                    //     Expanded(child: Divider()),
-                    //     Padding(
-                    //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    //       child: Text('Or continue with'),
-                    //     ),
-                    //     Expanded(child: Divider()),
-                    //   ],
-                    // ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // register / sign up option
-          SafeArea(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(isLogin? "Not a member?" : "Already a member?", style: TextStyle(fontWeight: FontWeight.bold)),
-                TextButton(
-                  onPressed: () {
-                    // Register
-                    setState(() {
-                      isLogin = !isLogin;
-                    });
-                  },
-                  style: TextButton.styleFrom(
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 5)
-                  ),
-                  child: Text(isLogin? "Register now" : "Login", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF247ff1)))
-                ),
-                SizedBox(width: 10)
-              ],
-            ),
-          )
-        ],
-      ),
-    );
+  udpateFcmToken() {
+    final authname = auth.currentUser!.displayName!.split("%20%");
+    final fcmTokenOnServer = authname[1];
+    if (fcmTokenOnServer != currentDeviceFcmToken) {
+      auth.currentUser!.updateDisplayName("${authname[0]}%20%$currentDeviceFcmToken");
+    }
   }
 
   authenticate() async {
@@ -342,12 +140,216 @@ class LoginScreen extends MainWrapperStateful {
       } else {
         if (passController.text == confirmPassController.text) {
           await auth.createUserWithEmailAndPassword(email: emailController.text, password: passController.text);
+          await FirebaseFirestore.instance.collection("users").doc(auth.currentUser!.uid).set({});
         } else {
           // TODO; show some feedack like passwords don't match
         }
       }
       updateDisplayName(displayNameController.text.trim().isEmpty? null : displayNameController.text);
     }
+  }
+
+  late final Size screenSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: showDisplayNameInput? SetDisplayNameScreen(updateDisplayName) : Scaffold(
+        backgroundColor: Color(0xFFF5F6FA),
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // App Logo or Title
+                Text(
+                  isLogin? 'Welcome Back!' : "Welcome to Chat!",
+                  style:  GoogleFonts.poppins(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  isLogin? 'Please log in to continue' : "Sign up to continue",
+                  style:  GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 40),
+                
+                // Email Text Field
+                TextField(
+                  controller: emailController,
+                  decoration: _textFieldDecoration(hintText: 'Email Address', icon: Icons.email_outlined),
+                ),
+                SizedBox(height: 16),
+                // Password Text Field
+                TextField(
+                  controller: passController,
+                  obscureText: true,
+                  decoration: _textFieldDecoration(hintText: "Password", icon: Icons.lock_outline)
+                ),
+
+                if (!isLogin) ...[
+                  SizedBox(height: 16),
+                  TextField(
+                    obscureText: true,
+                    controller: confirmPassController,
+                    decoration: _textFieldDecoration(hintText: "Password", icon: Icons.lock),
+                  )
+                ],
+                
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      // Add Forgot Password functionality here
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style:  GoogleFonts.poppins(
+                        color: Color(0xFF6C63FF),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Sign In Button
+                ElevatedButton(
+                  onPressed: authenticate,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF6C63FF),
+                    padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 80.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: Text(
+                    isLogin? 'Sign In' : "Sign up",
+                    style:  GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                
+                SizedBox(height: 24),
+
+                // Divider with "or"
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey[400],
+                        thickness: 1,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        'or',
+                        style:  GoogleFonts.poppins(color: Colors.grey[600]),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: Colors.grey[400],
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+
+                // Social Login Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildSocialButton(
+                      icon: Icons.facebook,
+                      color: Color(0xFF3b5998),
+                      onPressed: null
+                    ),
+                    SizedBox(width: 20),
+                    _buildSocialButton(
+                      icon: Icons.g_mobiledata,
+                      color: Color(0xFFdb4437),
+                      onPressed: null
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 30),
+
+                // Sign Up Option
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      isLogin? "Don't have an account?" : "Already registered?",
+                      style:  GoogleFonts.poppins(color: Colors.grey[700]),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to Sign Up screen
+                        setState(() {
+                          isLogin = !isLogin;
+                        });
+                      },
+                      child: Text(
+                        isLogin? 'Sign Up' : "Sign in",
+                        style:  GoogleFonts.poppins(
+                          color: Color(0xFF6C63FF),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Reusable TextField Widget
+  InputDecoration _textFieldDecoration({required String hintText, required IconData icon}) {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      hintText: hintText,
+      prefixIcon: Icon(icon, color: Colors.grey[500]),
+      contentPadding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 16.0),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.0),
+        borderSide: BorderSide.none,
+      ),
+    );
+  }
+
+  // Reusable Social Button Widget
+  Widget _buildSocialButton({required IconData icon, required Color color, required VoidCallback? onPressed}) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: CircleBorder(),
+        padding: EdgeInsets.all(16),
+      ),
+      child: Icon(icon, color: Colors.white, size: 28),
+    );
   }
 
   @override

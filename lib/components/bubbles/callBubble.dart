@@ -44,7 +44,7 @@ class CallBubble extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Icon(
-                    isMissed ? Icons.phone_missed : Icons.phone,
+                    callState == CallState.ended? Icons.call_end_rounded : isMissed ? Icons.phone_missed : Icons.phone,
                     color: isMissed ? Colors.red : Colors.deepPurple.shade700,
                     size: 24,
                   ),

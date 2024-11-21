@@ -20,7 +20,12 @@ class Person implements NotificationInfo {
     }
   }
 
-  String? uid, email;
+  
+  String uid;
+
+  @override
+  String email;
+
   String? displayName;
 
   bool debugErrorFromPast = false;
@@ -44,7 +49,8 @@ class Person implements NotificationInfo {
     final displayNameFCMToken = currentUser.displayName!.split("%20%");
     final currentUserDisplayName = displayNameFCMToken[0];
     final currentUserFcmToken = displayNameFCMToken[1];
-    return Person(currentUser.uid, currentUser.email, fcmToken: currentUserFcmToken, displayName: currentUserDisplayName);
+
+    return Person(currentUser.uid, currentUser.email!, fcmToken: currentUserFcmToken, displayName: currentUserDisplayName);
   }
 
   Map<String, dynamic> toMap() {

@@ -1,6 +1,7 @@
 import 'package:chat/services/call/call_state.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:chat/users/person.dart';
+import 'package:chat/users/users_manager.dart';
 import 'package:get/get.dart';
 import '../provider_managers.dart';
 
@@ -21,6 +22,10 @@ class MessagesController<T> extends GetxController {
     data[messageIndex].details.duration = callMessage.details.duration;
 
     update();
+  }
+
+  updateMessageSendingStatus(String messageId) {
+    data.firstWhere((message)=> message.id == messageId).isSending = false;
   }
 
 }
@@ -49,11 +54,27 @@ class FriendsController<T> extends GetxController {
     });
   }
 
+  updateFcmToken({required String email, required String updatedFcmToken}) {
+    final Person user = data.firstWhere((e) => e.email == email);
+
+    user.fcmToken = updatedFcmToken;
+
+    final int userIndex = data.indexWhere((e)=> e.email == email);
+    
+    data[userIndex] = user;
+
+    update();
+  }
+
   updateLastMessage(Message lastMessage) {
     int friendIndex = data.indexWhere((friend)=> friend.uid == lastMessage.details.uid);
     if (friendIndex == -1) {
       data.add(lastMessage.details);
       friendIndex = data.length - 1;
+
+      UsersManager.addNewFriend(lastMessage.details.email, userData: lastMessage.details).then((value) {
+        print("friend ${lastMessage.details.email} added to database");
+      });
     }
 
     data[friendIndex].lastMessage = lastMessage;

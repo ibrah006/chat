@@ -57,6 +57,10 @@ dependencies:
   audioplayers: ^6.1.0
   google_fonts: ^6.2.1
   flutter_slidable: ^3.1.1
+  flutter_sound: ^9.17.0
+  flutter_sound_platform_interface: ^9.17.0
+  firebase_storage: ^12.3.6
+  ffmpeg_kit_flutter: ^6.0.3
 
 dev_dependencies:
   flutter_test:

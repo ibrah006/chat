@@ -12,6 +12,7 @@ import 'package:chat/services/provider/state_controller/state_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
 import 'package:chat/widget_main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -61,29 +62,38 @@ class HomeScreen extends MainWrapperStateful {
     FirebaseMessaging.instance.getInitialMessage().then((remoteMessage) {
       if (remoteMessage!=null) {
         print("invoked home screen initial message!, remoteMessage: ${remoteMessage.data}");
-        handleMessage(remoteMessage);
+
+        final formattedMessage = Message.fromMap(remoteMessage.data, onReceive: true);
+
+        if (formattedMessage.details.roomId != null) {
+          handleMessage(remoteMessage);
+        } else {
+          onMessage(remoteMessage);
+        }
       }
     });
 
-    FirebaseMessaging.onMessage.listen((remoteMessage) {
-      print("remote notification received while inside home screen: ${remoteMessage.data}");
-
-      final formattedRemoteMessage = Message.fromMap(Map.of(remoteMessage.data));
-
-      messagesSource.add(formattedRemoteMessage);
-      if (Get.currentRoute != "/chat") {
-        // play sound
-        InAppNotification.show(formattedRemoteMessage);
-        formattedRemoteMessage.isRead = false;
-      }
-
-      friendsController.updateLastMessage(formattedRemoteMessage);
-
-      AudioPlayer().play(AssetSource(audioPath));
-      messagesController.data.add(formattedRemoteMessage);
-    });
+    FirebaseMessaging.onMessage.listen(onMessage);
 
     sinceStart.start();
+  }
+
+  onMessage(RemoteMessage remoteMessage) {
+     print("remote notification received while inside home screen: ${remoteMessage.data}");
+
+    final formattedRemoteMessage = Message.fromMap(Map.of(remoteMessage.data), onReceive: true);
+
+    messagesSource.add(formattedRemoteMessage);
+    if (Get.currentRoute != "/chat") {
+      InAppNotification.show(formattedRemoteMessage);
+      formattedRemoteMessage.isRead = false;
+    }
+
+    friendsController.updateLastMessage(formattedRemoteMessage);
+
+    // play sound
+    AudioPlayer().play(AssetSource(audioPath));
+    messagesController.data.add(formattedRemoteMessage);
   }
 
   @override
@@ -113,9 +123,20 @@ class HomeScreen extends MainWrapperStateful {
             icon: Icon(Icons.search, color: Colors.grey[700]),
             onPressed: () {},
           ),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.grey[700]),
-            onPressed: () {},
+          PopupMenuButton(
+            itemBuilder: (context)=> [
+              PopupMenuItem(
+                onTap: logout,
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.logout),
+                    SizedBox(width: 10),
+                    Text("Log out")
+                  ],
+                )
+              )
+            ]
           ),
         ],
         centerTitle: true,
@@ -143,7 +164,7 @@ class HomeScreen extends MainWrapperStateful {
         child: Icon(Icons.message, color: Colors.white),
         onPressed: () async {
           // Add new chat action
-          Get.toNamed('/search');
+          await Get.toNamed('/search');
           setState(() {});
         },
       ),
@@ -291,14 +312,6 @@ class HomeScreen extends MainWrapperStateful {
   Future<void> refreshFcmToken(String email) async {
 
     final updatedUserFcmToken = await UsersManager.updateUserFcmToken(email);
-    final Person user = friendsController.data.firstWhere((e) => e.email == email);
-
-    user.fcmToken = updatedUserFcmToken;
-
-    final int userIndex = friendsController.data.indexWhere((e)=> e.email == email);
-    
-    friendsController.data[userIndex] = user;
-    setState(() {});
   }
 
   void addCallback() async {

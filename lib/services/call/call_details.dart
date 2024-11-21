@@ -55,16 +55,22 @@ class CallDetails extends Person implements NotificationInfo {
   }
 
   CallDetails copyFrom(Person person, {CallState state_ = CallState.ongoing, DateTime? timestamp}) {
-    return CallDetails(
+    final data = CallDetails(
       person.uid?? uid!,
       person.email?? email!,
       person.fcmToken,
       callType: callType,
       state: state_,
       displayName: person.displayName?? displayName,
-      timestamp: timestamp)
-        ..initializeRoomId(roomId!)
-        ..debugErrorFromPast = person.debugErrorFromPast;
+      timestamp: timestamp);
+
+    if (roomId != null) {
+      data.initializeRoomId(roomId!);
+    }
+
+    data.debugErrorFromPast = person.debugErrorFromPast;
+
+    return data;
   }
 
   static CallDetails fromMap(Map map) {

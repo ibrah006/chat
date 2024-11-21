@@ -1,6 +1,8 @@
 import 'package:chat/services/provider/state_controller/state_controller.dart';
 import 'package:chat/users/person.dart';
 import 'package:chat/users/users_manager.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,10 +50,13 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       usersAdding.add(user.uid!);
     });
 
-    // await UsersManager.addNewFriend(user.email!, userData: user);
-    // friendsController.data.add(user);
-    await Future.delayed(Duration(seconds: 3));
+    await UsersManager.addNewFriend(user.email!, userData: user);
+    friendsController.data.add(user);
 
+    FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).update({
+      user.uid: "${user.displayName}%20%${user.fcmToken}"
+    });
+    
     setState(() {
       usersAdding.remove(user.uid!);
     });
@@ -98,6 +103,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

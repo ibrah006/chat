@@ -9,8 +9,11 @@ import 'package:chat/screens/user_search.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
+import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/services/provider/provider_managers.dart';
 import 'package:chat/users/person.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,6 +73,22 @@ void main(List<String> args) async {
   // Inject the FriendsManager (provider)
   final rawFriends = await LocalDatabase.get(Tables.chats);
   Get.put(FriendsManager(Person.fromIterableMap(rawFriends)));
+
+  // for (Person user in Person.fromIterableMap(rawFriends)) {
+  //   try {
+  //     await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).update({
+  //       user.uid: "${user.displayName}%20%${user.fcmToken}"
+  //     });
+  //     print("set friend ${user.displayName}");
+  //   } on Exception {
+  //     await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).set({});
+  //     await FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).update({
+  //       user.uid: "${user.displayName}%20%${user.fcmToken}"
+  //     });
+  //   }
+  // }
+
+  // SendPushNotification.checkFriendsFcmToken("L3x9kJhKGcRnnbjzlS8VsYjG9Yp1", "Dell", "cKB8HKy0QEKfk-YW1bgVoO:APA91bFyf74eXtmdCAOfDx83dM_fKJtmejfS1jjrHsu0KATUaXr1z6l_WKRaKR38OSXJC_X_AOkNOwauZ_WXQNb_-47kCHVb1ywGz5QwbEdPE0W0fLGRlDKQdek-QDDFIK2OTmv3Gev_");
 
   runApp(OverlaySupport.global(
     child: GetMaterialApp(

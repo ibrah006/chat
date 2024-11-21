@@ -40,4 +40,11 @@ class DateManager {
       return DateFormat.yMMMd().format(dateTime); // Shows the date, e.g., "Oct 10, 2023"
     }
   }
+
+  static String formatSecondsToMinutes(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final remainingSeconds = (seconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$remainingSeconds';
+  }
+
 }
