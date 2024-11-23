@@ -172,7 +172,7 @@ class VoiceMessage {
   Future<void> send() async {
     if (recordingPath == null) return;
 
-    final uri = Uri.parse('http://192.168.0.103:5000/upload');
+    final uri = Uri.parse('http://192.168.0.159:5000/upload');
     final request = http.MultipartRequest('POST', uri);
 
     // Add the file to the request

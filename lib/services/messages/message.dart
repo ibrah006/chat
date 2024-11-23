@@ -137,18 +137,21 @@ class AudioMessage extends Message {
 
   // Function to download the file from the backend
   Future<void> download() async {
-
-    final filename = "audio_$id.aac";
+    
+    // Becuase when the file is saved no special chars is allowed ('-' in this case which is replaced with '_')
+    final filename = "audio_${id.replaceAll("-", "_")}";
 
     // Request storage permission (on Android)
-    PermissionStatus permissionStatus = await Permission.storage.request();
-    if (!permissionStatus.isGranted) {
-      print('Storage permission denied');
-      return;
-    }
+    // PermissionStatus permissionStatus = await Permission.storage.request();
+    // if (!permissionStatus.isGranted) {
+    //   print('Storage permission denied');
+    //   return;
+    // }
+
+    print("file to download: ${filename}");
 
     // Backend URL - Replace with your backend's IP address or domain
-    final url = Uri.parse('http://192.168.0.103:5000/download/$filename'); // Use your local IP or server URL
+    final url = Uri.parse('http://192.168.0.159:5000/download/$filename'); // Use your local IP or server URL
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -187,4 +190,52 @@ class AudioMessage extends Message {
     };
   }
 
+}
+
+class MediaMessage extends Message {
+  MediaMessage(super.id, super.text, super.details, {required super.fromUserUid});
+  
+  late final String path;
+
+  Future<void> download() async {
+
+    final fileType = this is ImageMesssage? "message" : "audio";
+    
+    // Becuase when the file is saved no special chars is allowed ('-' in this case which is replaced with '_')
+    final filename = "${fileType}_${id.replaceAll("-", "_")}";
+
+    // Request storage permission (on Android)
+    // PermissionStatus permissionStatus = await Permission.storage.request();
+    // if (!permissionStatus.isGranted) {
+    //   print('Storage permission denied');
+    //   return;
+    // }
+
+    print("file to download: ${filename}");
+
+    // Backend URL - Replace with your backend's IP address or domain
+    final url = Uri.parse('http://192.168.0.159:5000/download/$filename'); // Use your local IP or server URL
+    final response = await http.get(url);
+    final fileExtension = response.headers['x-file-extension'];
+
+    if (response.statusCode == 200) {
+      // Get the app's document directory to store the file
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$filename.$fileExtension';
+      final file = File(filePath);
+
+      // Write the response body (file) to the local file
+      await file.writeAsBytes(response.bodyBytes);
+
+      path = filePath;
+
+      print('File downloaded to $filePath');
+    } else {
+      print('Failed to download file');
+    }
+  }
+}
+
+class ImageMesssage extends MediaMessage {
+  ImageMesssage(super.id, super.text, super.details, {required super.fromUserUid});
 }

@@ -3,6 +3,7 @@
 
 import 'package:chat/components/bubbles/bubble.dart';
 import 'package:chat/components/bubbles/callBubble.dart';
+import 'package:chat/components/static/message_input/add_expandable.dart';
 import 'package:chat/components/static/voice_note_recorder.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/call/call_state.dart';
@@ -173,10 +174,7 @@ class ChatScreen extends MainWrapperStateful {
           color: Colors.white,  // Background color of message input area set to white
           child: Row(
             children: [
-              if (isRecordingStateNone()) IconButton(
-                icon: Icon(Icons.add, color: Color(0xFF6C63FF)),
-                onPressed: () {},
-              ),
+              if (isRecordingStateNone()) AddExpandableButtons(),
               Expanded(
                 child: !isRecordingStateNone()? VoiceNoteRecorder(
                   voiceMessage,
@@ -261,6 +259,8 @@ class ChatScreen extends MainWrapperStateful {
     message.details =  CallDetails.fromUserInfo(Person.fromFirebaseAuth(_auth), null);
 
     print("message data from _sendNoti: ${message.toMap()}");
+
+    print("person uid: ${person.uid}, curretn user uid: ${_auth.currentUser!.uid}");
 
     if (person.uid != _auth.currentUser!.uid) {
       // can't pass in message.details.fcmToken instead of person.fcmToken as the former holds the value(fcm token) of the current user in all scenarios
@@ -384,12 +384,14 @@ class ChatScreen extends MainWrapperStateful {
 
     print("we are ion the init of chta screen");
 
-    SendPushNotification.getUpdatedFcmToken(person.uid, person.email).then((String? newFcmToken) {
-      if (newFcmToken != null) {
-        // set the fcm token for user locally
-        friendsController.updateFcmToken(email: person.email, updatedFcmToken: newFcmToken);
-      }
-    });
+    if (_auth.currentUser!.uid != person.uid) {
+      SendPushNotification.getUpdatedFcmToken(person.uid, person.email).then((String? newFcmToken) {
+        if (newFcmToken != null) {
+          // set the fcm token for user locally
+          friendsController.updateFcmToken(email: person.email, updatedFcmToken: newFcmToken);
+        }
+      });
+    }
 
     if (person.lastMessage?.isRead == false) {
       person.lastMessage?.isRead = true;

@@ -2,10 +2,12 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:chat/components/minimal_tile.dart';
 import 'package:chat/components/static/concepts.dart';
+import 'package:chat/components/static/no_chats_placeholder.dart';
 import 'package:chat/constants/date.dart';
 import 'package:chat/constants/developer_debug.dart';
 import 'package:chat/databases/local_database.dart';
 import 'package:chat/databases/tables.dart';
+import 'package:chat/services/call/call_details.dart';
 import 'package:chat/services/notification/notification_service.dart' show handleMessage;
 import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/services/provider/state_controller/state_controller.dart';
@@ -41,6 +43,7 @@ class HomeScreen extends MainWrapperStateful {
   static const audioPath = "audio/bubble.mp3";
 
   // when a message comes in for the current user, it is stored inside this until read in the chat_screen
+  @Deprecated('Looks to be not used in the code. Check for uses before completely removing it')
   final List<Message> messagesSource = [];
 
   final MessagesController messagesController = Get.put(MessagesController());
@@ -63,6 +66,7 @@ class HomeScreen extends MainWrapperStateful {
       if (remoteMessage!=null) {
         print("invoked home screen initial message!, remoteMessage: ${remoteMessage.data}");
 
+        // all the formatting is done here: like converting it to media message (if any)
         final formattedMessage = Message.fromMap(remoteMessage.data, onReceive: true);
 
         if (formattedMessage.details.roomId != null) {
@@ -105,70 +109,93 @@ class HomeScreen extends MainWrapperStateful {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      backgroundColor: Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Chats',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.grey[700]),
-            onPressed: () {},
-          ),
-          PopupMenuButton(
-            itemBuilder: (context)=> [
-              PopupMenuItem(
-                onTap: logout,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.logout),
-                    SizedBox(width: 10),
-                    Text("Log out")
-                  ],
-                )
-              )
-            ]
-          ),
-        ],
-        centerTitle: true,
-      ),
-      body: GetBuilder<FriendsController>(
+
+    return GetBuilder<FriendsController>(
         builder: (context) {
-          final friends = friendsController.data;
-          return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 12.5),
-            children: List.generate(
-              friendsController.data.length,
-              (index) {
-                final Person friend = friends[index];
-          
-                return _buildChatTile(
-                  friend
-                );
-              }
-            )
-          );
-        }
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF6C63FF),
-        child: Icon(Icons.message, color: Colors.white),
-        onPressed: () async {
-          // Add new chat action
-          await Get.toNamed('/search');
-          setState(() {});
-        },
-      ),
+        final friends = friendsController.data;
+
+        return Scaffold(
+          backgroundColor: Color(0xFFF5F6FA),
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Text(
+              'Chats',
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(Icons.search, color: Colors.grey[700]),
+                onPressed: () {},
+              ),
+              PopupMenuButton(
+                itemBuilder: (context)=> [
+                  PopupMenuItem(
+                    onTap: logout,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.logout),
+                        SizedBox(width: 10),
+                        Text("Log out")
+                      ],
+                    )
+                  )
+                ]
+              ),
+            ],
+            centerTitle: true,
+          ),
+          body: friends.isEmpty
+            ? NoChatsPlaceholder(onStartChat: onStartNewChat)
+              : ListView(
+                padding: const EdgeInsets.symmetric(vertical: 12.5),
+                children: List.generate(
+                  friendsController.data.length,
+                  (index) {
+                    final Person friend = friends[index];
+              
+                    return _buildChatTile(
+                      friend
+                    );
+                  }
+                )
+              ),
+          floatingActionButton: friendsController.data.isEmpty? SizedBox() : GestureDetector(
+            onTap: onStartNewChat,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Color(0xFF6C63FF),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 8,
+                    offset: Offset(2, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 32,
+              ),
+            ),
+          ),
+        );
+      }
     );
+  }
+
+  void onStartNewChat() async {
+    // Navigate to the "Start New Chat" screen
+    await Get.toNamed("/search");
+    setState(() {});
   }
 
   void toChatScreenCallback(Person user) async {
@@ -312,6 +339,12 @@ class HomeScreen extends MainWrapperStateful {
   Future<void> refreshFcmToken(String email) async {
 
     final updatedUserFcmToken = await UsersManager.updateUserFcmToken(email);
+    
+    final Person user = friendsController.data.firstWhere((person)=> person.email == email);
+
+    user.fcmToken = updatedUserFcmToken;
+
+    setState(() {});
   }
 
   void addCallback() async {

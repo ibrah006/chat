@@ -72,9 +72,9 @@ class FriendsController<T> extends GetxController {
       data.add(lastMessage.details);
       friendIndex = data.length - 1;
 
-      UsersManager.addNewFriend(lastMessage.details.email, userData: lastMessage.details).then((value) {
-        print("friend ${lastMessage.details.email} added to database");
-      });
+      // UsersManager.addNewFriend(lastMessage.details.email, userData: lastMessage.details).then((value) {
+      //   print("friend ${lastMessage.details.email} added to database");
+      // });
     }
 
     data[friendIndex].lastMessage = lastMessage;

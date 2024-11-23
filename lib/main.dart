@@ -9,11 +9,8 @@ import 'package:chat/screens/user_search.dart';
 import 'package:chat/services/call/call_details.dart';
 import 'package:chat/firebase_options.dart';
 import 'package:chat/services/notification/notification_service.dart';
-import 'package:chat/services/notification/send_notification.dart';
 import 'package:chat/services/provider/provider_managers.dart';
 import 'package:chat/users/person.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -65,7 +62,7 @@ void main(List<String> args) async {
   final String fcmToken = await NotificationService.intializeNotification();
 
   //TODO: remove this when shifitng to call screen
-  await Permission.camera.request();
+  await [Permission.camera].request();
 
   // Inject the MessagesManager (provider)
   Get.put(MessagesManager());

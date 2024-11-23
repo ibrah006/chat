@@ -1,11 +1,8 @@
-import 'dart:math';
 
 import 'package:chat/constants/date.dart';
 import 'package:chat/services/messages/message.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'dart:io';
 
 class AudioBubble extends StatefulWidget {
 
@@ -21,12 +18,8 @@ class AudioBubble extends StatefulWidget {
 }
 
 class _AudioBubbleState extends State<AudioBubble> {
-  Future<String> get path async {
-    await widget.message.download();
 
-    return widget.message.path;
-  }
-
+  late Future<String> path;
   bool get isSender => widget.message.isSender;
 
   String get audioDuration => DateManager.formatSecondsToMinutes(widget.message.duration.inSeconds);
@@ -35,6 +28,16 @@ class _AudioBubbleState extends State<AudioBubble> {
 
   void onPlayPause() {
 
+  }
+
+  void download() {
+    path = _getPath();
+  }
+
+  Future<String> _getPath() async {
+    await widget.message.download();
+
+    return widget.message.path;
   }
 
   @override
@@ -64,17 +67,25 @@ class _AudioBubbleState extends State<AudioBubble> {
           child: Row(
             children: [
               // Play/Pause Button
-              GestureDetector(
-                onTap: onPlayPause,
-                child: CircleAvatar(
-                  backgroundColor: isSender ? Color(0xFF6C63FF) : Colors.grey[500],
-                  radius: 20,
-                  child: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
+              FutureBuilder(
+                future: path,
+                builder: (context, AsyncSnapshot asyncSnapshot) {
+              
+                  print("path; ${asyncSnapshot.data}");
+              
+                  return GestureDetector(
+                    onTap: asyncSnapshot.data == "downloading"? download : onPlayPause,
+                    child: CircleAvatar(
+                      backgroundColor: asyncSnapshot.data == "downloading"? Colors.transparent : (isSender ? Color(0xFF6C63FF) : Colors.grey[500]),
+                      radius: 20,
+                      child: Icon(
+                        asyncSnapshot.data == "downloading"? Icons.download : (isPlaying ? Icons.pause : Icons.play_arrow),
+                        color: isSender? Color(0xFF6C63FF) : Colors.white,
+                        size: asyncSnapshot.data == "downloading"? 27.5 : 24,
+                      ),
+                    ),
+                  );
+                }
               ),
               const SizedBox(width: 12),
         
@@ -116,6 +127,14 @@ class _AudioBubbleState extends State<AudioBubble> {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    download();
   }
 }
 
